@@ -2,13 +2,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { client } from '../../services/coingecko'
 
-type Data = {
-  name: string
-}
-
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<string[]>
 ) {
-  res.status(200).json({ name: 'John Doe' })
+  const response = await client.simpleSupportedCurrencies()
+  res.status(200).json(response)
 }
