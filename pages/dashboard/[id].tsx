@@ -2,14 +2,12 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { Dashboard } from "lib/models";
+import { useContext, useEffect, useState } from "react";
+import { Dashboard, PriceResponse } from "lib/types";
 import { addPair, getDashboardById } from "lib/store";
-import { useBootstrapData } from "lib/hooks";
-import { SimplePriceResponse } from "coingecko-api-v3";
-// import { createDashboard, getDashboards } from "../store";
+import { BootstrapDataContext } from "components/BootstrapDataProvider";
 
-const getPrices = async (dashboard: Dashboard, onResult: (prices: SimplePriceResponse) => void) => {
+const getPrices = async (dashboard: Dashboard, onResult: (prices: PriceResponse) => void) => {
   const ids = dashboard?.pairs.map(p => p.id).join(",")
   const vsCurrencies = dashboard?.pairs.map(p => p.vsCurrency).join(",")
   
@@ -22,10 +20,9 @@ const Dashboard: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const [dashboard, setDashboard] = useState<Dashboard>();
-  // TODO: Hoist getting this data higher up
-  const { supportedTokens, supportedCurrencies, coinMap } = useBootstrapData();
+  const { supportedTokens, supportedCurrencies, coinMap } = useContext(BootstrapDataContext)
   const [newSymbol, setNewSymbol] = useState<string>();
-  const [prices, setPrices] = useState()
+  const [prices, setPrices] = useState<PriceResponse>()
 
   const addNewPair = (newVsCurrency: string) => {
     if (!dashboard || !newSymbol || !newVsCurrency) {
@@ -73,8 +70,6 @@ const Dashboard: NextPage = () => {
         <h1>
           {dashboard.title} - {dashboard.id}
         </h1>
-
-        {/* <button onClick={getPrices}>get prices</button> */}
 
         <label>Add token:</label>
         <select

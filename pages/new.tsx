@@ -2,14 +2,14 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { FormEventHandler, useState } from "react";
 import { createDashboard } from "lib/store";
 
 const NewDashboard: NextPage = () => {
   const router = useRouter();
   const [title, setTitle] = useState("");
 
-  const onCreate = (e) => {
+  const onCreate: FormEventHandler<HTMLFormElement> = (e) => {
     e.stopPropagation();
     e.preventDefault();
     const dashboard = createDashboard(title);

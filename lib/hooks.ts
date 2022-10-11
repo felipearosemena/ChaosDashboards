@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import useSWR from "swr";
-import { BootstrapData, BootstrapResponse, Coin } from "lib/models";
+import { BootstrapData, BootstrapResponse, Coin } from "lib/types";
 import { getDashboards } from "lib/store";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());

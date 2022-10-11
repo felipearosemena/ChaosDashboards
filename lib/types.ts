@@ -28,3 +28,9 @@ export type Dashboard = {
   title: string;
   pairs: CoinPair[];
 };
+
+export type PriceResponse = {
+  [coin: string]: {
+    [currency: string]: number;
+  };
+};

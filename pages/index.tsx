@@ -3,13 +3,11 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useBootstrapData } from "lib/hooks";
-import { Dashboard } from "lib/models";
+import { Dashboard } from "lib/types";
 import { getDashboards } from "lib/store";
-// import { CoinPair } from ".libmodels/CoinPair";
 
 const Home: NextPage = () => {
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
-  // const { supportedCurrencies, coinMap } = useBootstrapData();
 
   useEffect(() => {
     setDashboards(getDashboards());

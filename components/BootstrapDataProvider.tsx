@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { BootstrapData } from "lib/models";
+import { BootstrapData } from "lib/types";
 import { useBootstrapData } from "lib/hooks";
 
 export const BootstrapDataContext = React.createContext<BootstrapData>({

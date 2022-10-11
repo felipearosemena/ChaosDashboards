@@ -1,6 +1,5 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { BootstrapResponse, Coin } from "lib/models";
+import { BootstrapResponse, Coin } from "lib/types";
 import { client } from "services/coingecko";
 
 export default async function handler(

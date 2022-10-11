@@ -8,11 +8,11 @@
 
 ## Improvements
 
-- Relative imports
+- Graphql + Codegen
+- Server side storage
 
 
-
-// Update prices periodically
+// Update prices
 client.simplePrice
 
 // Currencies for dropdown?
