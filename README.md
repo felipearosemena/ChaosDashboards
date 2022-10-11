@@ -4,7 +4,7 @@
 
 - Dashboards -> `/`
 - Dashboard -> `/dashboard/:id`
-- Edit Dashboards -> `/edit`
+- Add Dashboard -> `/new`
 
 ## Improvements
 

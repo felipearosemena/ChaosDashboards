@@ -1,31 +1,43 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import useSWR from "swr";
-import { CoinPair } from "../models/CoinPair";
-import styles from "../styles/Home.module.css";
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-let aPair: CoinPair = ["1", "2"]
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useBootstrapData } from "../hooks";
+import { Dashboard } from "../models";
+import { getDashboards } from "../store";
+// import { CoinPair } from "../models/CoinPair";
 
 const Home: NextPage = () => {
-  const { data, error } = useSWR<string[]>("/api/pairs", fetcher);
+  const [dashboards, setDashboards] = useState<Dashboard[]>([]);
+  // const { supportedCurrencies, coinMap } = useBootstrapData();
+
+  useEffect(() => {
+    setDashboards(getDashboards());
+  }, []);
 
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
         <title>Chaos Dashboards</title>
         <meta name="description" content="Create currency pair widgets" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        {data && (
-          <select placeholder="Choose symbol">
-            {data.map((symbol) => (
-              <option value={symbol} key={symbol}>{symbol}</option>
+      <main>
+        <Link href="/new">add dashboard</Link>
+        <hr />
+        {dashboards.length && (
+          <ul>
+            {dashboards.map((dashboard) => (
+              <li key={dashboard.id}>
+                <Link href={`/dashboard/${dashboard.id}`}>
+                  <span>
+                    {dashboard.title} - {dashboard.pairs.length} pairs
+                  </span>
+                </Link>
+              </li>
             ))}
-          </select>
+          </ul>
         )}
       </main>
     </div>
