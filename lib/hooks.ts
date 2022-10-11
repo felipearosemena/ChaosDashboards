@@ -5,7 +5,6 @@ import { getDashboards } from "lib/store";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-// TODO: Make a provider
 export const useBootstrapData = (): BootstrapData => {
   // TODO: Handle error
   const { data, error } = useSWR<BootstrapResponse>("/api/bootstrap", fetcher);
@@ -32,12 +31,4 @@ export const useBootstrapData = (): BootstrapData => {
   } else {
     return { supportedTokens: [], supportedCurrencies: [], coinMap: new Map() };
   }
-};
-
-export const useDashboards = () => {
-  const dashboards = getDashboards();
-
-  return {
-    dashboards,
-  };
 };
