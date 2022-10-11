@@ -1,27 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { BootstrapResponse, Dashboard, CoinPair } from "lib/types";
-
-export const getBootstrapData = (): BootstrapResponse => {
-  const data = localStorage.getItem("bootstrap");
-  const emptyResponse: BootstrapResponse = {
-    supportedCurrencies: [],
-    coins: [],
-  };
-
-  if (data) {
-    try {
-      return JSON.parse(data);
-    } catch {
-      return emptyResponse;
-    }
-  } else {
-    return emptyResponse;
-  }
-};
-
-export const setBootstrapData = (data: BootstrapResponse) => {
-  localStorage.setItem("bootstrap", JSON.stringify(data));
-};
+import { Dashboard, CoinPair } from "lib/types";
 
 export const getDashboards = (): Dashboard[] => {
   if (typeof window === "undefined") {
