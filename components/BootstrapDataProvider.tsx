@@ -1,11 +1,10 @@
 import React, { ReactNode } from "react";
-import { BootstrapData } from "lib/types";
+import { BootstrapResponse } from "lib/types";
 import { useBootstrapData } from "lib/hooks";
 
-export const BootstrapDataContext = React.createContext<BootstrapData>({
-  supportedTokens: [],
+export const BootstrapDataContext = React.createContext<BootstrapResponse>({
   supportedCurrencies: [],
-  coinMap: new Map(),
+  coins: {},
 });
 
 export const BootstrapDataProvider: React.FC<{ children: ReactNode }> = ({

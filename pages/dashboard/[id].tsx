@@ -3,39 +3,54 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import { Dashboard, PriceResponse } from "lib/types";
+import { Coin, CoinDict, Dashboard, PriceResponse } from "lib/types";
 import { addPair, getDashboardById } from "lib/store";
 import { BootstrapDataContext } from "components/BootstrapDataProvider";
 
-const getPrices = async (dashboard: Dashboard, onResult: (prices: PriceResponse) => void) => {
-  const ids = dashboard?.pairs.map(p => p.id).join(",")
-  const vsCurrencies = dashboard?.pairs.map(p => p.vsCurrency).join(",")
-  
-  const response = await fetch(`/api/prices?ids=${ids}&vs_currencies=${vsCurrencies}`)
-  const prices = await response.json()
-  onResult(prices)
-}
+// Define Server Side Props
+// export async function getServerSideProps(context: any) {
+//   // fetch the todo, the param was received via context.query.id
+//   const res = await fetch(process.env.API_URL + "/" + context.query.id)
+//   const todo = await res.json()
+
+//   //return the serverSideProps the todo and the url from out env variables for frontend api calls
+//   return { props: { todo, url: process.env.API_URL } }
+// }
+
+const getPrices = async (
+  dashboard: Dashboard,
+  coins: CoinDict,
+  onResult: (prices: PriceResponse) => void
+) => {
+  const ids = dashboard?.pairs
+    .map((p) => {
+      const symbol = p[0];
+      const coin = coins[symbol];
+      return coin?.id;
+    })
+    .filter((id) => id)
+    .join(",");
+
+  const vsCurrencies = dashboard?.pairs.map((p) => p[1]).join(",");
+
+  const response = await fetch(
+    `/api/prices?ids=${ids}&vs_currencies=${vsCurrencies}`
+  );
+
+  if (response.ok) {
+    const prices = await response.json();
+    onResult(prices);
+  }
+};
 
 const Dashboard: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const [dashboard, setDashboard] = useState<Dashboard>();
-  const { supportedTokens, supportedCurrencies, coinMap } = useContext(BootstrapDataContext)
+  const { supportedCurrencies, coins } = useContext(BootstrapDataContext);
   const [newSymbol, setNewSymbol] = useState<string>();
-  const [prices, setPrices] = useState<PriceResponse>()
-
-  const addNewPair = (newVsCurrency: string) => {
-    if (!dashboard || !newSymbol || !newVsCurrency) {
-      return;
-    }
-
-    const coinId = coinMap.get(newSymbol)?.id;
-    if (coinId) {
-      addPair(dashboard.id, coinId, newVsCurrency);
-      setNewSymbol(undefined);
-      getDashboard();
-    }
-  };
+  const [prices, setPrices] = useState<PriceResponse>({});
+  const hasCoins = !!Object.values(coins).length;
 
   const getDashboard = () => {
     if (typeof id === "string") {
@@ -43,10 +58,25 @@ const Dashboard: NextPage = () => {
 
       if (dashboard) {
         setDashboard(dashboard);
-        getPrices(dashboard, setPrices)
       }
     }
   };
+
+  const addNewPair = (newVsCurrency: string) => {
+    if (!dashboard || !newSymbol || !newVsCurrency) {
+      return;
+    }
+
+    addPair(dashboard.id, newSymbol, newVsCurrency);
+    setNewSymbol(undefined);
+    getDashboard();
+  };
+
+  useEffect(() => {
+    if (dashboard && Object.values(coins).length) {
+      getPrices(dashboard, coins, setPrices);
+    }
+  }, [coins, dashboard]);
 
   useEffect(() => {
     if (!dashboard) {
@@ -67,9 +97,7 @@ const Dashboard: NextPage = () => {
 
       <main>
         <Link href="/">Back</Link>
-        <h1>
-          {dashboard.title} - {dashboard.id}
-        </h1>
+        <h1>{dashboard.title}</h1>
 
         <label>Add token:</label>
         <select
@@ -78,8 +106,8 @@ const Dashboard: NextPage = () => {
           onChange={(e) => setNewSymbol(e.target.value)}
         >
           <option>Choose symbol</option>
-          {supportedTokens.map((symbol) => (
-            <option key={symbol}>{symbol}</option>
+          {Object.values(coins).map((coin) => (
+            <option key={coin.id}>{coin.symbol}</option>
           ))}
         </select>
 
@@ -102,12 +130,26 @@ const Dashboard: NextPage = () => {
         )}
 
         {dashboard &&
-          dashboard.pairs.map((pair) => (
-            <div key={`${pair.id}-${pair.vsCurrency}`}>
-              {pair.id} / {pair.vsCurrency}
-              {prices && prices[pair.id] && prices[pair.id][pair.vsCurrency]}
-            </div>
-          ))}
+          hasCoins &&
+          dashboard.pairs.sort().map((pair) => {
+            const coin = coins[pair[0]];
+            const vsCurrency = coins[pair[1]];
+
+            const coinId = coin.id || "";
+            const vsCurrencySumbol = vsCurrency.symbol || "";
+            let price =
+              (coinId && prices[coinId] && prices[coinId][vsCurrencySumbol]) ||
+              "";
+
+            return (
+              <div key={`${pair[0]}-${pair[1]}`}>
+                <img src={coin.image} alt="" width={20} height={20} />{" "}
+                {coin?.name} /{" "}
+                <img src={vsCurrency.image} alt="" width={20} height={20} />{" "}
+                {vsCurrency?.name} - {price}
+              </div>
+            );
+          })}
       </main>
     </div>
   );

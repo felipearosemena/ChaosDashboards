@@ -3,24 +3,18 @@ export type Coin = {
   symbol?: string;
   name?: string;
   image?: string;
+  price?: number
 };
+
+export type CoinPair = [symbol: string, vsCurrency: string]
+
+export type CoinDict = {
+  [symbol: string]: Coin
+}
 
 export type BootstrapResponse = {
   supportedCurrencies: string[];
-  coins: Coin[];
-};
-
-export type CoinMap = Map<string, Coin>;
-
-export type BootstrapData = {
-  supportedTokens: string[];
-  supportedCurrencies: string[];
-  coinMap: CoinMap;
-};
-
-export type CoinPair = {
-  id: string;
-  vsCurrency: string;
+  coins: CoinDict
 };
 
 export type Dashboard = {
