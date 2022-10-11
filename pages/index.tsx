@@ -24,7 +24,7 @@ const Home: NextPage = () => {
       <main>
         <Link href="/new">add dashboard</Link>
         <hr />
-        {dashboards.length && (
+        {!!dashboards.length && (
           <ul>
             {dashboards.map((dashboard) => (
               <li key={dashboard.id}>
