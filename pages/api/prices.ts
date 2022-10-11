@@ -9,14 +9,19 @@ export default async function handler(
   const query = req.query;
   const { ids, vs_currencies } = query;
 
-  if (typeof ids === "string" && typeof vs_currencies === "string") {
-    const response = await client.simplePrice({
+  if (typeof ids !== "string" || typeof vs_currencies !== "string") {
+    res.status(400).json({ error: "Bad request" });
+    return
+  }
+
+  try {
+    const prices = await client.simplePrice({
       ids,
       vs_currencies,
     });
-
-    res.status(200).json(response);
-  } else {
-    res.status(400).json({ error: "Bad request" });
+  
+    res.status(200).json(prices);
+  } catch {
+    res.status(404).json({ error: "Unable to load price data" });
   }
 }
