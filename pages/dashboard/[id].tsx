@@ -3,7 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import { CoinDict, Dashboard, PriceResponse } from "lib/types";
+import { CoinDict, CoinPair, Dashboard, PriceResponse } from "lib/types";
 import { addPair, getDashboardById } from "lib/store";
 import { BootstrapDataContext } from "components/BootstrapDataProvider";
 
@@ -48,8 +48,7 @@ const Dashboard: NextPage = () => {
   const { id } = router.query;
   const [dashboard, setDashboard] = useState<Dashboard>();
   const { supportedCurrencies, coins } = useContext(BootstrapDataContext);
-  const [newSymbol, setNewSymbol] = useState<string>();
-  const [newVsCurrency, setNewVsCurrency] = useState<string>();
+  const [options, setOptions] = useState<CoinPair[]>([]);
   const [prices, setPrices] = useState<PriceResponse>({});
   const hasCoins = !!Object.values(coins).length;
 
@@ -63,16 +62,31 @@ const Dashboard: NextPage = () => {
     }
   };
 
-  const addNewPair = () => {
+  const addNewPair = (newSymbol: string, newVsCurrency: string) => {
     if (!dashboard || !newSymbol || !newVsCurrency) {
       return;
     }
 
     addPair(dashboard.id, newSymbol, newVsCurrency);
-    setNewSymbol(undefined);
-    setNewVsCurrency(undefined);
     getDashboard();
   };
+
+  useEffect(() => {
+    const coinValues = Object.values(coins);
+    if (coinValues.length) {
+      const options: CoinPair[] = supportedCurrencies
+        .map((vsCurrency) => {
+          return coinValues
+            .filter((coin) => coin.symbol && coin.symbol !== vsCurrency)
+            .map((coin) => ({
+              symbol: coin.symbol || "",
+              vsCurrency,
+            }));
+        })
+        .flat()
+      setOptions(options);
+    }
+  }, [supportedCurrencies, coins]);
 
   useEffect(() => {
     if (dashboard && Object.values(coins).length) {
@@ -101,37 +115,29 @@ const Dashboard: NextPage = () => {
         <Link href="/">Back</Link>
         <h1>{dashboard.title}</h1>
 
-        <label>Choose token:</label>
+        <label>Choose pair:</label>
         <select
-          key={"vscurrency-" + newVsCurrency}
-          value={newVsCurrency}
+          key={"vscurrency-" + dashboard?.pairs.length}
           onChange={(e) => {
-            setNewVsCurrency(e.target.value);
+            const option = e.target.value.split("/");
+            addNewPair(option[1], option[0]);
           }}
         >
-          <option>Choose symbol</option>
-          {supportedCurrencies
-            .filter((symbol) => symbol !== newSymbol)
-            .map((symbol) => (
-              <option key={symbol}>{symbol}</option>
-            ))}
+          <option>Choose symbol ({options.length})</option>
+          {options.map((options) => {
+            const value = options.vsCurrency + "/" + options.symbol;
+            const disabled = !!dashboard.pairs.find(
+              (pair) =>
+                pair.symbol === options.symbol &&
+                pair.vsCurrency === options.vsCurrency
+            );
+            return (
+              <option key={value} disabled={disabled}>
+                {value}
+              </option>
+            );
+          })}
         </select>
-
-        <label>Compare with:</label>
-        <select
-          key={"symbol-" + newSymbol}
-          value={newSymbol}
-          onChange={(e) => setNewSymbol(e.target.value)}
-        >
-          <option>Choose symbol</option>
-          {Object.values(coins)
-            .filter((coin) => coin.symbol !== newVsCurrency)
-            .map((coin) => (
-              <option key={coin.id}>{coin.symbol}</option>
-            ))}
-        </select>
-
-        <button onClick={addNewPair}>Add pair</button>
 
         {dashboard &&
           hasCoins &&
