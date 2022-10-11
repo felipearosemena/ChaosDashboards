@@ -23,15 +23,15 @@ const getPrices = async (
   onResult: (prices: PriceResponse) => void
 ) => {
   const ids = dashboard?.pairs
-    .map((p) => {
-      const symbol = p[0];
+    .map((pair) => {
+      const { symbol } = pair;
       const coin = coins[symbol];
       return coin?.id;
     })
     .filter((id) => id)
     .join(",");
 
-  const vsCurrencies = dashboard?.pairs.map((p) => p[1]).join(",");
+  const vsCurrencies = dashboard?.pairs.map((p) => p.vsCurrency).join(",");
 
   const response = await fetch(
     `/api/prices?ids=${ids}&vs_currencies=${vsCurrencies}`
@@ -136,11 +136,11 @@ const Dashboard: NextPage = () => {
         {dashboard &&
           hasCoins &&
           dashboard.pairs.sort().map((pair) => {
-            const coin = coins[pair[0]];
-            const vsCurrency = coins[pair[1]];
+            const coin = coins[pair.symbol];
+            const vsCoin = coins[pair.vsCurrency];
 
             const coinId = coin.id || "";
-            const vsCurrencySumbol = vsCurrency.symbol || "";
+            const vsCurrencySumbol = vsCoin.symbol || "";
             let price =
               coinId && prices[coinId] && prices[coinId][vsCurrencySumbol];
 
@@ -149,9 +149,9 @@ const Dashboard: NextPage = () => {
             }
 
             return (
-              <div key={`${pair[0]}-${pair[1]}`}>
-                <img src={vsCurrency.image} alt="" width={20} height={20} />{" "}
-                {vsCurrency?.name} /
+              <div key={`${pair.symbol}-${pair.vsCurrency}`}>
+                <img src={vsCoin.image} alt="" width={20} height={20} />{" "}
+                {vsCoin?.name} /
                 <img src={coin.image} alt="" width={20} height={20} />{" "}
                 {coin?.name}- {price}
               </div>

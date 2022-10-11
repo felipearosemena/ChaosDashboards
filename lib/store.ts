@@ -58,10 +58,10 @@ export const addPair = (
 ) => {
   const dashboard = getDashboardById(dashboardId)
   const pairExists = (pairs: CoinPair[] = []) =>
-    pairs.find((pair) => pair[0] === symbol && pair[1] === vsCurrency);
+    pairs.find((pair) => pair.symbol === symbol && pair.vsCurrency === vsCurrency);
 
   if (dashboard && !pairExists(dashboard.pairs)) {
-    dashboard.pairs.push([symbol, vsCurrency]);
+    dashboard.pairs.push({symbol, vsCurrency});
   
     updateDashboard(dashboard.id, dashboard.pairs)
   }

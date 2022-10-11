@@ -3,18 +3,18 @@ export type Coin = {
   symbol?: string;
   name?: string;
   image?: string;
-  price?: number
+  price?: number;
 };
 
-export type CoinPair = [symbol: string, vsCurrency: string]
+export type CoinPair = { symbol: string; vsCurrency: string };
 
 export type CoinDict = {
-  [symbol: string]: Coin
-}
+  [symbol: string]: Coin;
+};
 
 export type BootstrapResponse = {
   supportedCurrencies: string[];
-  coins: CoinDict
+  coins: CoinDict;
 };
 
 export type Dashboard = {
