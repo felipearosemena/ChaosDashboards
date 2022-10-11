@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { BootstrapResponse, Dashboard, CoinPair } from "./models";
+import { BootstrapResponse, Dashboard, CoinPair } from "lib/models";
 
 export const getBootstrapData = (): BootstrapResponse => {
   const data = localStorage.getItem("bootstrap");

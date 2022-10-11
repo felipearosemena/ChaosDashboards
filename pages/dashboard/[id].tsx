@@ -3,9 +3,9 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Dashboard } from "../../models";
-import { addPair, getDashboardById } from "../../store";
-import { useBootstrapData } from "../../hooks";
+import { Dashboard } from "lib/models";
+import { addPair, getDashboardById } from "lib/store";
+import { useBootstrapData } from "lib/hooks";
 import { SimplePriceResponse } from "coingecko-api-v3";
 // import { createDashboard, getDashboards } from "../store";
 
@@ -26,9 +26,6 @@ const Dashboard: NextPage = () => {
   const { supportedTokens, supportedCurrencies, coinMap } = useBootstrapData();
   const [newSymbol, setNewSymbol] = useState<string>();
   const [prices, setPrices] = useState()
-  // const [newVsCurrency, setNewVsCurrency] = useState<string>();
-
-  
 
   const addNewPair = (newVsCurrency: string) => {
     if (!dashboard || !newSymbol || !newVsCurrency) {

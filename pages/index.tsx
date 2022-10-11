@@ -2,10 +2,10 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useBootstrapData } from "../hooks";
-import { Dashboard } from "../models";
-import { getDashboards } from "../store";
-// import { CoinPair } from "../models/CoinPair";
+import { useBootstrapData } from "lib/hooks";
+import { Dashboard } from "lib/models";
+import { getDashboards } from "lib/store";
+// import { CoinPair } from ".libmodels/CoinPair";
 
 const Home: NextPage = () => {
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);

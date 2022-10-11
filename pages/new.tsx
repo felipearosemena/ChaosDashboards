@@ -1,24 +1,21 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Link from 'next/link'
-import { useRouter } from 'next/router'
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { useState } from "react";
-import { useBootstrapData } from "../hooks";
-import { createDashboard, getDashboards } from "../store";
+import { createDashboard } from "lib/store";
 
 const NewDashboard: NextPage = () => {
-  const router = useRouter()
-  // const { supportedCurrencies, coinMap } = useBootstrapData();
-  const [title, setTitle] = useState("")
-  const dashboards = getDashboards();
+  const router = useRouter();
+  const [title, setTitle] = useState("");
 
   const onCreate = (e) => {
-    e.stopPropagation()
-    e.preventDefault()
-    const dashboard = createDashboard(title)
-    router.push(`/dashboard/${dashboard.id}`)
-  }
-  
+    e.stopPropagation();
+    e.preventDefault();
+    const dashboard = createDashboard(title);
+    router.push(`/dashboard/${dashboard.id}`);
+  };
+
   return (
     <div>
       <Head>
@@ -27,8 +24,9 @@ const NewDashboard: NextPage = () => {
       </Head>
 
       <main>
+        <Link href="/">Back</Link>
         <form onSubmit={onCreate}>
-          <input name="title" onChange={e => setTitle(e.target.value)} />
+          <input name="title" onChange={(e) => setTitle(e.target.value)} />
           <button type="submit">Save</button>
         </form>
       </main>

@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { BootstrapResponse, Coin } from "../../models";
-import { client } from "../../services/coingecko";
+import { BootstrapResponse, Coin } from "lib/models";
+import { client } from "services/coingecko";
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,7 +9,6 @@ export default async function handler(
 ) {
   const [supportedCurrencies, market] = await Promise.all([
     client.simpleSupportedCurrencies(),
-    // client.coinList({ include_platform: false }),
     client.coinMarket({ vs_currency: "usd", ids: "", per_page: 250 }),
   ]);
 
@@ -22,7 +21,6 @@ export default async function handler(
 
   const response: BootstrapResponse = {
     supportedCurrencies,
-    // allCoinsList,
     coins,
   };
 
