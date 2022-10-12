@@ -109,7 +109,7 @@ const Dashboards: NextPage = () => {
                 onClick={() => router.push("/new")}
                 endIcon={<Rocket />}
               >
-                Let's Go
+                New Dashboard
               </Button>
             </div>
           )}
