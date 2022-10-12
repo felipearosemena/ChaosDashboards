@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { BootstrapResponse, CoinDict } from "lib/types";
-import { client } from "services/coingecko";
+import { client } from "lib/coingecko";
 
 export default async function handler(
   req: NextApiRequest,
@@ -21,12 +21,14 @@ export default async function handler(
           name: coin.name,
           symbol: coin.symbol,
           image: coin.image,
-          price: coin.current_price
+          price: coin.current_price,
         };
       }
     });
 
-    const supportedCurrencies = allSupportedCurrencies.filter(symbol => coins[symbol])
+    const supportedCurrencies = allSupportedCurrencies.filter(
+      (symbol) => coins[symbol]
+    );
 
     const response: BootstrapResponse = {
       supportedCurrencies,

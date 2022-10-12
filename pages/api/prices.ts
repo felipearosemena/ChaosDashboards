@@ -1,6 +1,6 @@
 import { PriceResponse } from "lib/types";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { client } from "services/coingecko";
+import { client } from "lib/coingecko";
 
 export default async function handler(
   req: NextApiRequest,
