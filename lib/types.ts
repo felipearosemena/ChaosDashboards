@@ -7,6 +7,7 @@ export type Coin = {
 };
 
 export type CoinPair = { symbol: string; vsCurrency: string };
+export type CoinPairOption = CoinPair & { value: string; disabled: boolean };
 
 export type CoinDict = {
   [symbol: string]: Coin;

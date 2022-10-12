@@ -1,9 +1,20 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEventHandler, useState } from "react";
 import { createDashboard } from "lib/store";
+import {
+  Button,
+  styled,
+  TextField,
+} from "@mui/material";
+import { Card } from "components/Layout";
+
+const Form = styled("form")({
+  margin: "auto",
+  display: "flex",
+  gap: 20,
+});
 
 const NewDashboard: NextPage = () => {
   const router = useRouter();
@@ -12,8 +23,10 @@ const NewDashboard: NextPage = () => {
   const onCreate: FormEventHandler<HTMLFormElement> = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    const dashboard = createDashboard(title);
-    router.push(`/dashboard/${dashboard.id}`);
+    if (title.length) {
+      const dashboard = createDashboard(title);
+      router.push(`/dashboard/${dashboard.id}`);
+    }
   };
 
   return (
@@ -24,11 +37,27 @@ const NewDashboard: NextPage = () => {
       </Head>
 
       <main>
-        <Link href="/">Back</Link>
-        <form onSubmit={onCreate}>
-          <input name="title" onChange={(e) => setTitle(e.target.value)} />
-          <button type="submit">Save</button>
-        </form>
+        <Card>
+          <h1>New Dashboard</h1>
+          <Form onSubmit={onCreate}>
+            <TextField
+              name="title"
+              autoFocus
+              label={"Name"}
+              onChange={(e) => setTitle(e.target.value)}
+              style={{ flexGrow: 1 }}
+            />
+            <Button
+              style={{ width: 160 }}
+              type="submit"
+              color="primary"
+              variant="outlined"
+              disabled={!title.length}
+            >
+              Add Dashboard
+            </Button>
+          </Form>
+        </Card>
       </main>
     </div>
   );

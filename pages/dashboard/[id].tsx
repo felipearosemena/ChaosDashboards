@@ -1,11 +1,14 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import { CoinDict, CoinPair, Dashboard, PriceResponse } from "lib/types";
+import { CoinDict, CoinPairOption, Dashboard, PriceResponse } from "lib/types";
 import { addPair, getDashboardById } from "lib/store";
 import { BootstrapDataContext } from "components/BootstrapDataProvider";
+import { Card } from "components/Layout";
+import { Grid, TextField } from "@mui/material";
+import { StatCardWidget } from "components/StatCardWidget";
+import Autocomplete from "components/Autocomplete";
 
 // Define Server Side Props
 // export async function getServerSideProps(context: any) {
@@ -47,8 +50,10 @@ const Dashboard: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const [dashboard, setDashboard] = useState<Dashboard>();
-  const { supportedCurrencies, coins } = useContext(BootstrapDataContext);
-  const [options, setOptions] = useState<CoinPair[]>([]);
+  const {
+    data: { supportedCurrencies, coins },
+  } = useContext(BootstrapDataContext);
+  const [options, setOptions] = useState<CoinPairOption[]>([]);
   const [prices, setPrices] = useState<PriceResponse>({});
   const hasCoins = !!Object.values(coins).length;
 
@@ -74,19 +79,31 @@ const Dashboard: NextPage = () => {
   useEffect(() => {
     const coinValues = Object.values(coins);
     if (coinValues.length) {
-      const options: CoinPair[] = supportedCurrencies
+      const options = supportedCurrencies
         .map((vsCurrency) => {
           return coinValues
             .filter((coin) => coin.symbol && coin.symbol !== vsCurrency)
-            .map((coin) => ({
-              symbol: coin.symbol || "",
-              vsCurrency,
-            }));
+            .map(({ symbol = "" }) => {
+              const value = vsCurrency + "/" + symbol;
+              const disabled = dashboard
+                ? !!dashboard.pairs.find(
+                    (pair) =>
+                      pair.symbol === symbol && pair.vsCurrency === vsCurrency
+                  )
+                : false;
+              return {
+                symbol,
+                vsCurrency,
+                value,
+                disabled,
+              };
+            });
         })
-        .flat()
+        .flat();
+
       setOptions(options);
     }
-  }, [supportedCurrencies, coins]);
+  }, [dashboard, supportedCurrencies, coins]);
 
   useEffect(() => {
     if (dashboard && Object.values(coins).length) {
@@ -112,57 +129,41 @@ const Dashboard: NextPage = () => {
       </Head>
 
       <main>
-        <Link href="/">Back</Link>
-        <h1>{dashboard.title}</h1>
+        <Card style={{ marginBottom: 20 }}>
+          <h1>{dashboard.title}</h1>
 
-        <label>Choose pair:</label>
-        <select
-          key={"vscurrency-" + dashboard?.pairs.length}
-          onChange={(e) => {
-            const option = e.target.value.split("/");
-            addNewPair(option[1], option[0]);
-          }}
-        >
-          <option>Choose symbol ({options.length})</option>
-          {options.map((options) => {
-            const value = options.vsCurrency + "/" + options.symbol;
-            const disabled = !!dashboard.pairs.find(
-              (pair) =>
-                pair.symbol === options.symbol &&
-                pair.vsCurrency === options.vsCurrency
-            );
-            return (
-              <option key={value} disabled={disabled}>
-                {value}
-              </option>
-            );
-          })}
-        </select>
+          <Autocomplete
+            key={"vscurrency-" + dashboard?.pairs.length}
+            options={options}
+            onChange={(option) => addNewPair(option.symbol, option.vsCurrency)}
+          />
+        </Card>
+        <Grid container spacing={2}>
+          {dashboard &&
+            hasCoins &&
+            dashboard.pairs.sort().map((pair) => {
+              const coin = coins[pair.symbol];
+              const vsCoin = coins[pair.vsCurrency];
 
-        {dashboard &&
-          hasCoins &&
-          dashboard.pairs.sort().map((pair) => {
-            const coin = coins[pair.symbol];
-            const vsCoin = coins[pair.vsCurrency];
+              const coinId = coin.id || "";
+              const vsCurrencySumbol = vsCoin.symbol || "";
+              let price;
 
-            const coinId = coin.id || "";
-            const vsCurrencySumbol = vsCoin.symbol || "";
-            let price =
-              coinId && prices[coinId] && prices[coinId][vsCurrencySumbol];
+              if (
+                coinId &&
+                prices[coinId] &&
+                prices[coinId][vsCurrencySumbol]
+              ) {
+                price = 1 / prices[coinId][vsCurrencySumbol];
+              }
 
-            if (price) {
-              price = 1 / price;
-            }
-
-            return (
-              <div key={`${pair.symbol}-${pair.vsCurrency}`}>
-                <img src={vsCoin.image} alt="" width={20} height={20} />{" "}
-                {vsCoin?.name} /
-                <img src={coin.image} alt="" width={20} height={20} />{" "}
-                {coin?.name}- {price}
-              </div>
-            );
-          })}
+              return (
+                <Grid item xs={4} key={`${pair.symbol}-${pair.vsCurrency}`}>
+                  <StatCardWidget coin={coin} vsCoin={vsCoin} price={price} />
+                </Grid>
+              );
+            })}
+        </Grid>
       </main>
     </div>
   );
