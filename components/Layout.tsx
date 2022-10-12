@@ -1,26 +1,16 @@
-import MenuIcon from "@mui/icons-material/Menu";
 import {
-  AppBar,
   Toolbar,
   Card as MuiCard,
-  IconButton,
-  Typography,
-  Button,
-  makeStyles,
-  Theme,
   styled,
-  Icon,
-  TextField,
   List,
   ListItem,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
   Box,
   Drawer,
 } from "@mui/material";
 import { useRouter } from "next/router";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -28,25 +18,20 @@ interface Props {
 
 const drawerWidth = 240;
 
-const Main = styled("main")(({ theme }) => ({
+const Container = styled("div")(({ theme }) => ({
   flexGrow: 1,
   padding: theme.spacing(0),
-  maxWidth: 1180,
+  maxWidth: 960,
+  margin: "auto",
 }));
 
 export const Card = styled(MuiCard)({
   padding: 30,
-  borderRadius: 16
-})
+  borderRadius: 16,
+});
 
-export const Layout: React.FC<Props> = ({ children }) => {
-  // const { window } = props;
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const router = useRouter()
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+const NavBar = () => {
+  const router = useRouter();
   const menuOptions = [
     {
       label: "Dashboards",
@@ -55,64 +40,46 @@ export const Layout: React.FC<Props> = ({ children }) => {
     { label: "New", path: "/new" },
   ];
 
-  const drawer = (
-    <div>
-      <Toolbar />
-      <List>
-        {menuOptions.map((item, index) => (
-          <ListItem key={item.path} disablePadding>
-            <ListItemButton
-              disableRipple
-              disabled={item.path === router.pathname}
-              onClick={() => router.push(item.path)}
-            >
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </div>
+  return (
+    <Box
+      component="nav"
+      sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+    >
+      <Drawer
+        variant="permanent"
+        sx={{
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
+            width: drawerWidth,
+          },
+        }}
+        open
+      >
+        <Toolbar />
+        <List>
+          {menuOptions.map((item) => (
+            <ListItem key={item.path} disablePadding>
+              <ListItemButton
+                disableRipple
+                disabled={item.path === router.pathname}
+                onClick={() => {
+                  router.push(item.path);
+                }}
+              >
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
+    </Box>
   );
+};
 
+export const Layout: React.FC<Props> = ({ children }) => {
   return (
     <Box sx={{ display: "flex" }}>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
-      >
-        {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          sx={{
-            display: { xs: "block", sm: "none" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: "none", sm: "block" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
+      <NavBar />
       <Box
         component="main"
         sx={{
@@ -121,7 +88,8 @@ export const Layout: React.FC<Props> = ({ children }) => {
           width: { sm: `calc(100% - ${drawerWidth}px)` },
         }}
       >
-        <Main>{children}</Main>
+        <Toolbar />
+        <Container>{children}</Container>
       </Box>
     </Box>
   );

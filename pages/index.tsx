@@ -1,6 +1,5 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { Dashboard } from "lib/types";
 import { getDashboards } from "lib/store";
@@ -9,15 +8,11 @@ import {
   Button,
   Chip,
   Divider,
-  Grid,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
-  styled,
 } from "@mui/material";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import { Box } from "@mui/system";
 import { Card } from "components/Layout";
 import Rocket from "@mui/icons-material/ChevronRight";
 import { BootstrapDataContext } from "components/BootstrapDataProvider";
@@ -32,7 +27,6 @@ import { BootstrapDataContext } from "components/BootstrapDataProvider";
 //   return { props: { todo, url: process.env.API_URL } }
 // }
 
-
 const Dashboards: NextPage = () => {
   const router = useRouter();
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
@@ -43,14 +37,16 @@ const Dashboards: NextPage = () => {
   }, []);
 
   if (loading) {
-    return <Card>Loading</Card>
+    return <Card>Loading</Card>;
   }
 
   if (error) {
-    return <Card>
-      <h1>Uh oh!</h1>
-      <p>{error}</p>
-    </Card>
+    return (
+      <Card>
+        <h1>Uh oh!</h1>
+        <p>{error}</p>
+      </Card>
+    );
   }
 
   return (
@@ -100,7 +96,6 @@ const Dashboards: NextPage = () => {
                     </ListItemButton>
                   );
                 })}
-
                 <Divider />
               </List>
             </>

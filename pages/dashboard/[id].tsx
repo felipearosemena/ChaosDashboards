@@ -6,7 +6,7 @@ import { CoinDict, CoinPairOption, Dashboard, PriceResponse } from "lib/types";
 import { addPair, getDashboardById } from "lib/store";
 import { BootstrapDataContext } from "components/BootstrapDataProvider";
 import { Card } from "components/Layout";
-import { Grid, TextField } from "@mui/material";
+import { Box, Grid, TextField } from "@mui/material";
 import { StatCardWidget } from "components/StatCardWidget";
 import Autocomplete from "components/Autocomplete";
 
@@ -52,6 +52,7 @@ const Dashboard: NextPage = () => {
   const [dashboard, setDashboard] = useState<Dashboard>();
   const {
     data: { supportedCurrencies, coins },
+    loading,
   } = useContext(BootstrapDataContext);
   const [options, setOptions] = useState<CoinPairOption[]>([]);
   const [prices, setPrices] = useState<PriceResponse>({});
@@ -121,6 +122,10 @@ const Dashboard: NextPage = () => {
     return null;
   }
 
+  if (loading) {
+    return <Card>Loading</Card>;
+  }
+
   return (
     <div>
       <Head>
@@ -129,16 +134,20 @@ const Dashboard: NextPage = () => {
       </Head>
 
       <main>
-        <Card style={{ marginBottom: 20 }}>
-          <h1>{dashboard.title}</h1>
+        <Box mb={3}>
+          <Card>
+            <h1>{dashboard.title}</h1>
 
-          <Autocomplete
-            key={"vscurrency-" + dashboard?.pairs.length}
-            options={options}
-            onChange={(option) => addNewPair(option.symbol, option.vsCurrency)}
-          />
-        </Card>
-        <Grid container spacing={2}>
+            <Autocomplete
+              key={"vscurrency-" + dashboard?.pairs.length}
+              options={options}
+              onChange={(option) =>
+                addNewPair(option.symbol, option.vsCurrency)
+              }
+            />
+          </Card>
+        </Box>
+        <Grid container spacing={3}>
           {dashboard &&
             hasCoins &&
             dashboard.pairs.sort().map((pair) => {
@@ -158,7 +167,7 @@ const Dashboard: NextPage = () => {
               }
 
               return (
-                <Grid item xs={4} key={`${pair.symbol}-${pair.vsCurrency}`}>
+                <Grid item xs={6} key={`${pair.symbol}-${pair.vsCurrency}`}>
                   <StatCardWidget coin={coin} vsCoin={vsCoin} price={price} />
                 </Grid>
               );

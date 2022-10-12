@@ -134,11 +134,12 @@ export default function VirtualizedAutocomplete({
       id="virtualize-demo"
       sx={{ width: 300 }}
       disableListWrap
+      
       PopperComponent={StyledPopper}
       ListboxComponent={ListboxComponent}
+      getOptionDisabled={option => option.disabled}
       onChange={(e, value) => value && onChange(value)}
       options={options}
-      // groupBy={(option) => option.vsCurrency.toUpperCase()}
       getOptionLabel={(option) => option.value}
       renderInput={(params) => (
         <TextField {...params} label="Add crypto pair" />

@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { styled, Typography } from "@mui/material";
 import { Coin } from "lib/types";
 import { Card } from "./Layout";
 
@@ -8,40 +8,57 @@ type StatCardWidgetProps = {
   price?: number;
 };
 
+const CardGrid = styled("div")({ display: "grid", gap: 8 });
+
+const CardHeader = styled("div")({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 8,
+});
+
+const Pair = styled("div")({
+  height: 24,
+  textTransform: "uppercase",
+  fontWeight: 600,
+  display: "flex",
+  gap: 8,
+  alignItems: "center",
+});
+
+const Source = styled("small")({
+  opacity: 0.8,
+});
+
+const Price = styled("h2")({ height: 24, lineHeight: "24px", margin: 0 });
+
+const PairSymbol = ({ coin }: { coin: Coin }) => {
+  return (
+    <>
+      <img src={coin.image} alt={coin.name} width={20} height={20} />
+      <span>{coin?.symbol}</span>
+    </>
+  );
+};
+
 export const StatCardWidget: React.FC<StatCardWidgetProps> = ({
   coin,
   vsCoin,
   price,
 }) => {
   return (
-    <Card style={{ display: "grid", gap: 8 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div
-          style={{
-            height: 24,
-            textTransform: "uppercase",
-            fontWeight: 600,
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-          }}
-        >
-          <img src={vsCoin.image} alt="" width={20} height={20} />{" "}
-          <span>{vsCoin?.symbol}</span> <span>/</span>
-          <img src={coin.image} alt="" width={20} height={20} />{" "}
-          <span>{coin?.symbol}</span>
-        </div>
-        <small style={{ opacity: 0.8 }}>Source: Coinbase</small>
-      </div>
-      <h2 style={{ height: 24, lineHeight: '24px', margin: 0 }}>
-        {price?.toFixed(2) ?? "-"}
-      </h2>
+    <Card>
+      <CardGrid>
+        <CardHeader>
+          <Pair>
+            <PairSymbol coin={vsCoin} /> /
+            <PairSymbol coin={coin} />
+          </Pair>
+          <Source>Source: Coinbase</Source>
+        </CardHeader>
+        <Price>{price?.toFixed(2) ?? "-"}</Price>
+      </CardGrid>
     </Card>
   );
 };

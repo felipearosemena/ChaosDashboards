@@ -12,7 +12,8 @@ import { Card } from "components/Layout";
 
 const Form = styled("form")({
   margin: "auto",
-  display: "flex",
+  display: "grid",
+  gridTemplateColumns: '300px auto',
   gap: 20,
 });
 
