@@ -2,9 +2,11 @@
 
 Public url at: https://chaos-dashboards.vercel.app/
 
+> This coingecko api is rate limited to 10 requests each 60 seconds. I also noticed it can timeout on the first request. 
+> If you get an error loading tokens, reload the browser or try again in a few seconds
 ## Architecture
 
-<img src="https://user-images.githubusercontent.com/6720312/195651293-f5c4bdb5-827f-4651-b82c-a9a113dbea75.png" width="720" />
+<img src="https://user-images.githubusercontent.com/6720312/195718224-4b5166d2-27c6-4628-ba3a-5c25132f15d9.png" width="720" />
 
 ## Install and start the server
 
@@ -23,20 +25,14 @@ Once the server starts, visit: `http://localhost:3000`
 ## API
 
 ### `/api/graphql`
-Most of the API is driven via graphql. Visit `/api/graphql` in the browser to access the Yoga playground.
+All the API is driven via graphql. Visit `/api/graphql` in the browser to access the Yoga playground.
 
 Any Query or Mutation that interacts with a `Dashboard` or it's `CryptoPair`s reads and writes from a MongoDB instance.
 
-Credentials are saved to `.env.local.sample` for ease of share with the tester. In production we're remove the credentials from the file.
+Credentials are saved to `.env.local.sample` for ease of share with the tester.
 
-The `coinInfo` Query hits the coingecko api directly.
+`coinInfo` & `prices` Queries hit the coingecko api directly. They cannot be abused or we'll hit the rate limit for the free tier.
 
-> This coingecko api is rate limited to 10 requests each 60 seconds, and while i was tested i noticed it can be fickle. If you see an error loading coins, reload or try again in a few seconds
-
-### `/api/prices`
-Gets prices directly from coingecko. 
-
-> TODO: Move this endpoint to a graphql query as well
 
 ## Improvements
 
