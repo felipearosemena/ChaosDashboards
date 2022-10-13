@@ -44,9 +44,9 @@ Gets prices directly from coingecko.
 - [x] Autocomplete For Pairs
 - [x] Server side storage
 - [x] Initial coin data fetching error handling
-- [x] Filter out from selected pairs in dashboard
+- [x] Disable selected pairs in dashboard
 - [ ] Tests
-- [ ] Auth & Dashboards per user 
+- [ ] Auth & Dashboards per user
 - [ ] Better search UX: search by coin name to filter out symbol options
 - [ ] Responsive styles
 - [ ] Graceful widget + image loading
