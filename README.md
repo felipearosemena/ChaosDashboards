@@ -1,6 +1,6 @@
 # Chaos Dashboards
 
-Public url at: https://chaos-dashboards-felipearosemena.vercel.app/
+Public url at: https://chaos-dashboards.vercel.app/
 
 ## Install and Run
 
