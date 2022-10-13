@@ -23,11 +23,13 @@ Public url at: https://chaos-dashboards.vercel.app/
 ### `/api/graphql`
 Most of the API is driven via graphql. Visit `/api/graphql` in the browser to access the Yoga playground.
 
-Any Query or Mutation that interacts with a `Dashboard` or it's `CryptoPair`s reads and writes from a MongoDB instance. The credentials are saved to the `.env.local.sample` file for ease of share with the tester. In production we're remove the credentials from the file.
+Any Query or Mutation that interacts with a `Dashboard` or it's `CryptoPair`s reads and writes from a MongoDB instance.
 
-The `coinInfo` Query pings the coingecko api directly and returns the reponse. 
+Credentials are saved to `.env.local.sample` for ease of share with the tester. In production we're remove the credentials from the file.
 
-> This api is rate limited to 10 requests each 60seconds, and in my testing it can be fickle. If you see an error loading coins, reload or try again in a few seconds
+The `coinInfo` Query hits the coingecko api directly.
+
+> This coingecko api is rate limited to 10 requests each 60 seconds, and while i was tested i noticed it can be fickle. If you see an error loading coins, reload or try again in a few seconds
 
 ### `/api/prices`
 Gets prices directly from coingecko. 
