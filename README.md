@@ -1,5 +1,7 @@
 # Chaos Dashboards
 
+Public url at: https://chaos-dashboards-felipearosemena.vercel.app/
+
 ## Install and Run
 
 - Rename `.env.local.sample` to `.env.local`
