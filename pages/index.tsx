@@ -19,13 +19,10 @@ import { CoinInfoError } from "components/CoinInfoError";
 
 const Dashboards: NextPage = () => {
   const router = useRouter();
-  const { loading: loadingCoinInfo, error: coinInfoError } = useContext(CoinDataContext);
-  const {
-    data,
-    loading: loadingDashboards,
-    refetch,
-  } = useDashboardsQuery({
-    fetchPolicy: "network-only",
+  const { loading: loadingCoinInfo, error: coinInfoError } =
+    useContext(CoinDataContext);
+  const { data, loading: loadingDashboards } = useDashboardsQuery({
+    fetchPolicy: "cache-first",
   });
 
   if (loadingCoinInfo || loadingDashboards) {
@@ -39,7 +36,7 @@ const Dashboards: NextPage = () => {
   }
 
   if (coinInfoError) {
-    return <CoinInfoError message={coinInfoError.message} />
+    return <CoinInfoError message={coinInfoError.message} />;
   }
 
   const dashboards = data?.dashboards || [];

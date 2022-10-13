@@ -69,6 +69,7 @@ const DashboardPage: NextPage = () => {
     error: coinInfoError,
   } = useContext(CoinDataContext);
   const { data, loading: loadingDashboard } = useDashboardByIdQuery({
+    fetchPolicy: "cache-first",
     variables: { id },
     skip: !id.length,
   });

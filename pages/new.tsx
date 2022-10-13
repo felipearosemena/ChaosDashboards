@@ -10,7 +10,10 @@ import {
   TextField,
 } from "@mui/material";
 import { Card } from "components/Layout";
-import { useCreateDashboardMutation } from "lib/graphql/generated";
+import {
+  useCreateDashboardMutation,
+  DashboardsDocument,
+} from "lib/graphql/generated";
 
 const Form = styled("form")({
   margin: "auto",
@@ -23,6 +26,7 @@ const NewDashboard: NextPage = () => {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [createDashboard, { loading }] = useCreateDashboardMutation({
+    refetchQueries: [{ query: DashboardsDocument }],
     onCompleted({ createDashboard }) {
       router.push(`/dashboard/${createDashboard.id}`);
     },
@@ -66,18 +70,20 @@ const NewDashboard: NextPage = () => {
                 variant="outlined"
                 disabled={!title.length || loading}
               >
-                {!loading ? 'Add Dashboard' : (
-                <CircularProgress
-                  size={24}
-                  sx={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    marginTop: "-12px",
-                    marginLeft: "-12px",
-                  }}
-                />
-              )}
+                {!loading ? (
+                  "Add Dashboard"
+                ) : (
+                  <CircularProgress
+                    size={24}
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      marginTop: "-12px",
+                      marginLeft: "-12px",
+                    }}
+                  />
+                )}
               </Button>
             </Box>
           </Form>
