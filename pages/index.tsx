@@ -11,7 +11,6 @@ import {
   ListItemButton,
   ListItemText,
 } from "@mui/material";
-import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Card } from "components/Layout";
 import Rocket from "@mui/icons-material/ChevronRight";
 import { CoinDataContext } from "components/CoinDataProvider";
