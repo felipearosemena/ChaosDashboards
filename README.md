@@ -8,10 +8,10 @@ Public url at: https://chaos-dashboards.vercel.app/
 
 ## Install and Run
 
-- Requires node version `>=16` -> `nvm use 16`
-- Rename `.env.local.sample` to `.env.local`
+- `mv .env.local.sample .env.local`
 - `yarn && yarn dev`
 
+> Requires node >=16: `nvm use 16`
 ## Pages
 
 - Dashboards -> `/`
