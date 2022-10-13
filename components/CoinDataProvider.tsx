@@ -1,17 +1,17 @@
 import useSWR from "swr";
 import React, { ReactNode } from "react";
-import { BootstrapResponse } from "lib/types";
+import { CoinResponse } from "lib/types";
 
-type BootstrapData = {
-  data: BootstrapResponse;
+type CoinData = {
+  data: CoinResponse;
   loading: boolean;
   error: string | null;
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export const useBootstrapData = (): BootstrapData => {
-  const { data, error } = useSWR<BootstrapResponse>("/api/bootstrap", fetcher);
+export const useCoinData = (): CoinData => {
+  const { data, error } = useSWR<CoinResponse>("/api/bootstrap", fetcher);
 
   if (error) {
     return {
@@ -49,7 +49,7 @@ export const useBootstrapData = (): BootstrapData => {
   }
 };
 
-export const BootstrapDataContext = React.createContext<BootstrapData>({
+export const CoinDataContext = React.createContext<CoinData>({
   data: {
     supportedCurrencies: [],
     coins: {},
@@ -58,14 +58,14 @@ export const BootstrapDataContext = React.createContext<BootstrapData>({
   error: null,
 });
 
-export const BootstrapDataProvider: React.FC<{ children: ReactNode }> = ({
+export const CoinDataProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const data = useBootstrapData();
+  const data = useCoinData();
 
   return (
-    <BootstrapDataContext.Provider value={data}>
+    <CoinDataContext.Provider value={data}>
       {children}
-    </BootstrapDataContext.Provider>
+    </CoinDataContext.Provider>
   );
 };

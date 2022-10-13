@@ -1,6 +1,6 @@
 import "styles/globals.css";
 import type { AppProps } from "next/app";
-import { BootstrapDataProvider } from "components/BootstrapDataProvider";
+import { CoinDataProvider } from "components/CoinDataProvider";
 import Head from "next/head";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Layout } from "components/Layout";
@@ -20,14 +20,14 @@ function MyApp({ Component, pageProps }: AppProps) {
       })}
     >
       <CssBaseline />
-      <BootstrapDataProvider>
+      <CoinDataProvider>
         <Head>
           <meta name="viewport" content="initial-scale=1, width=device-width" />
         </Head>
         <Layout>
           <Component {...pageProps} />
         </Layout>
-      </BootstrapDataProvider>
+      </CoinDataProvider>
     </ThemeProvider>
   );
 }

@@ -15,16 +15,21 @@ import {
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Card } from "components/Layout";
 import Rocket from "@mui/icons-material/ChevronRight";
-import { BootstrapDataContext } from "components/BootstrapDataProvider";
+import { CoinDataContext } from "components/CoinDataProvider";
 
-const Dashboards: NextPage = () => {
-  const router = useRouter();
+const useDashboards = () => {
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
-  const { loading, error } = useContext(BootstrapDataContext);
-
   useEffect(() => {
     setDashboards(getDashboards());
   }, []);
+
+  return dashboards;
+};
+
+const Dashboards: NextPage = () => {
+  const router = useRouter();
+  const { loading, error } = useContext(CoinDataContext);
+  const dashboards = useDashboards()
 
   if (loading) {
     return <Card>Loading</Card>;

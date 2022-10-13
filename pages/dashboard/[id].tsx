@@ -2,20 +2,20 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import { CoinDict, CoinPairOption, Dashboard, PriceResponse } from "lib/types";
+import { CoinDict, CoinPair, CoinPairOption, Dashboard, PriceResponse } from "lib/types";
 import { addPair, getDashboardById } from "lib/store";
-import { BootstrapDataContext } from "components/BootstrapDataProvider";
+import { CoinDataContext } from "components/CoinDataProvider";
 import { Card } from "components/Layout";
 import { Box, Grid, TextField } from "@mui/material";
 import { StatCardWidget } from "components/StatCardWidget";
 import Autocomplete from "components/Autocomplete";
 
 const getPrices = async (
-  dashboard: Dashboard,
+  pairs: CoinPair[] = [],
   coins: CoinDict,
   onResult: (prices: PriceResponse) => void
 ) => {
-  const ids = dashboard?.pairs
+  const ids = pairs
     .map((pair) => {
       const { symbol } = pair;
       const coin = coins[symbol];
@@ -24,7 +24,7 @@ const getPrices = async (
     .filter((id) => id)
     .join(",");
 
-  const vsCurrencies = dashboard?.pairs.map((p) => p.vsCurrency).join(",");
+  const vsCurrencies = pairs.map((p) => p.vsCurrency).join(",");
 
   const response = await fetch(
     `/api/prices?ids=${ids}&vs_currencies=${vsCurrencies}`
@@ -43,7 +43,7 @@ const Dashboard: NextPage = () => {
   const {
     data: { supportedCurrencies, coins },
     loading,
-  } = useContext(BootstrapDataContext);
+  } = useContext(CoinDataContext);
   const [options, setOptions] = useState<CoinPairOption[]>([]);
   const [prices, setPrices] = useState<PriceResponse>({});
   const hasCoins = !!Object.values(coins).length;
@@ -97,8 +97,8 @@ const Dashboard: NextPage = () => {
   }, [dashboard, supportedCurrencies, coins]);
 
   useEffect(() => {
-    if (dashboard && Object.values(coins).length) {
-      getPrices(dashboard, coins, setPrices);
+    if (dashboard?.pairs && Object.values(coins).length) {
+      getPrices(dashboard.pairs, coins, setPrices);
     }
   }, [coins, dashboard]);
 

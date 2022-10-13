@@ -13,7 +13,7 @@ export type CoinDict = {
   [symbol: string]: Coin;
 };
 
-export type BootstrapResponse = {
+export type CoinResponse = {
   supportedCurrencies: string[];
   coins: CoinDict;
 };

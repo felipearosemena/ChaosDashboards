@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { BootstrapResponse, CoinDict } from "lib/types";
+import { CoinResponse, CoinDict } from "lib/types";
 import { client } from "lib/coingecko";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<BootstrapResponse | Error>
+  res: NextApiResponse<CoinResponse | Error>
 ) {
   try {
     const [allSupportedCurrencies, coinMarket] = await Promise.all([
@@ -30,13 +30,14 @@ export default async function handler(
       (symbol) => coins[symbol]
     );
 
-    const response: BootstrapResponse = {
+    const response: CoinResponse = {
       supportedCurrencies,
       coins,
     };
 
     res.status(200).json(response);
-  } catch {
+  } catch(error) {
+    console.log(error)
     res.status(404).json(new Error("Failed to load data"));
   }
 }
