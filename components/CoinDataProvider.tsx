@@ -1,23 +1,20 @@
-import useSWR from "swr";
 import React, { ReactNode } from "react";
+import { ApolloError } from "@apollo/client";
 import {
-  CoinInfo,
   useCoinInfoQuery,
+  CoinInfoQuery,
 } from "lib/graphql/generated";
 
 type CoinDataContextType = {
-  coinInfo?: CoinInfo;
+  data: CoinInfoQuery | undefined;
   loading: boolean;
-  error: boolean;
+  error?: ApolloError | undefined;
 };
 
 export const CoinDataContext = React.createContext<CoinDataContextType>({
-  coinInfo: {
-    coins: [],
-    supportedCurrencies: [],
-  },
+  data: undefined,
   loading: false,
-  error: false,
+  error: undefined,
 });
 
 export const CoinDataProvider: React.FC<{ children: ReactNode }> = ({
@@ -26,9 +23,7 @@ export const CoinDataProvider: React.FC<{ children: ReactNode }> = ({
   const { data, loading, error } = useCoinInfoQuery();
 
   return (
-    <CoinDataContext.Provider
-      value={{ coinInfo: data?.coinInfo || undefined, loading, error: !!error }}
-    >
+    <CoinDataContext.Provider value={{ data, loading, error }}>
       {children}
     </CoinDataContext.Provider>
   );

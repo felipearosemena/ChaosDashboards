@@ -66,7 +66,7 @@ export type MutationCreateDashboardArgs = {
 };
 
 export type Query = {
-  coinInfo?: Maybe<CoinInfo>;
+  coinInfo: CoinInfo;
   dashboard?: Maybe<Dashboard>;
   dashboards: Array<Dashboard>;
 };
@@ -375,11 +375,7 @@ export type QueryResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
 > = {
-  coinInfo?: Resolver<
-    Maybe<ResolversTypes["CoinInfo"]>,
-    ParentType,
-    ContextType
-  >;
+  coinInfo?: Resolver<ResolversTypes["CoinInfo"], ParentType, ContextType>;
   dashboard?: Resolver<
     Maybe<ResolversTypes["Dashboard"]>,
     ParentType,
@@ -422,7 +418,7 @@ export type DashboardFragmentFragment = {
 export type CoinInfoQueryVariables = Exact<{ [key: string]: never }>;
 
 export type CoinInfoQuery = {
-  coinInfo?: {
+  coinInfo: {
     supportedCurrencies: Array<string>;
     coins: Array<{
       id: string;
@@ -431,7 +427,7 @@ export type CoinInfoQuery = {
       image: string;
       price: number;
     }>;
-  } | null;
+  };
 };
 
 export type DashboardsQueryVariables = Exact<{ [key: string]: never }>;

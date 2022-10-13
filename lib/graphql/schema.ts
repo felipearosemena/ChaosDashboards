@@ -4,7 +4,7 @@ export const typeDefs = gql`
   type Query {
     dashboards: [Dashboard!]!
     dashboard(id: ID!): Dashboard
-    coinInfo: CoinInfo
+    coinInfo: CoinInfo!
   }
 
   type Mutation {

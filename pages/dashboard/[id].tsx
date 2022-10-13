@@ -16,6 +16,7 @@ import {
   CoinInfo,
   CryptoPair,
 } from "lib/graphql/generated";
+import { CoinInfoError } from "components/CoinInfoError";
 
 type CoinDict = { [key: string]: Coin };
 
@@ -61,8 +62,8 @@ const getPrices = async (
 
 const DashboardPage: NextPage = () => {
   const router = useRouter();
-  const { coinInfo, loading: loadingCoinInfo } = useContext(CoinDataContext);
   const id = typeof router.query.id === "string" ? router.query.id : "";
+  const { data: coinInfoData, loading: loadingCoinInfo, error: coinInfoError } = useContext(CoinDataContext);
   const { data, loading: loadingDashboard } = useDashboardByIdQuery({
     variables: { id },
     skip: !id.length,
@@ -70,6 +71,7 @@ const DashboardPage: NextPage = () => {
   const [addCryptoPair] = useAddCryptoPairMutation({
     refetchQueries: [{ query: DashboardByIdDocument, variables: { id } }],
   });
+  const coinInfo = coinInfoData?.coinInfo
   const coinDict = useCoinDict(coinInfo);
   const dashboard = data?.dashboard;
   const pairs = dashboard ? [...dashboard.pairs] : [];
@@ -128,7 +130,17 @@ const DashboardPage: NextPage = () => {
   }
 
   if (loadingCoinInfo || loadingDashboard) {
-    return <Card>Loading</Card>;
+    const label = [
+      loadingCoinInfo && "tokens",
+      loadingCoinInfo && "dashboards",
+    ]
+      .filter((v) => v)
+      .join(", ");
+    return <Card>Loading: {label}</Card>;
+  }
+
+  if (coinInfoError) {
+    return <CoinInfoError message={coinInfoError.message} />
   }
 
   return (

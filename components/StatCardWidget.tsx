@@ -1,4 +1,4 @@
-import { styled, Typography } from "@mui/material";
+import { CircularProgress, styled } from "@mui/material";
 import { Coin } from "lib/graphql/generated";
 import { Card } from "./Layout";
 
@@ -57,7 +57,7 @@ export const StatCardWidget: React.FC<StatCardWidgetProps> = ({
           </Pair>
           <Source>Source: Coinbase</Source>
         </CardHeader>
-        <Price>{price?.toFixed(2) ?? "-"}</Price>
+        <Price>{price ? price.toFixed(2) : <CircularProgress size={16} />}</Price>
       </CardGrid>
     </Card>
   );

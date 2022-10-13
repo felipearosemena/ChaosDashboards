@@ -15,28 +15,34 @@ import { Card } from "components/Layout";
 import Rocket from "@mui/icons-material/ChevronRight";
 import { CoinDataContext } from "components/CoinDataProvider";
 import { useDashboardsQuery } from "lib/graphql/generated";
+import { CoinInfoError } from "components/CoinInfoError";
 
 const Dashboards: NextPage = () => {
   const router = useRouter();
-  const { loading, error } = useContext(CoinDataContext);
-  const { data, loading: loadingDashboards, error: dashboardsError } = useDashboardsQuery({
-    fetchPolicy: 'network-only'
+  const { loading: loadingCoinInfo, error: coinInfoError } = useContext(CoinDataContext);
+  const {
+    data,
+    loading: loadingDashboards,
+    refetch,
+  } = useDashboardsQuery({
+    fetchPolicy: "network-only",
   });
 
-  if (loading || loadingDashboards) {
-    return <Card>Loading</Card>;
+  if (loadingCoinInfo || loadingDashboards) {
+    const label = [
+      loadingCoinInfo && "tokens",
+      loadingDashboards && "dashboards",
+    ]
+      .filter((v) => v)
+      .join(", ");
+    return <Card>Loading: {label}</Card>;
   }
 
-  if (error || dashboardsError) {
-    return (
-      <Card>
-        <h1>Uh oh!</h1>
-        <p>{error}</p>
-      </Card>
-    );
+  if (coinInfoError) {
+    return <CoinInfoError message={coinInfoError.message} />
   }
 
-  const dashboards = data?.dashboards || []
+  const dashboards = data?.dashboards || [];
 
   return (
     <div>

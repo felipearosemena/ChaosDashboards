@@ -1,6 +1,6 @@
 import { Resolvers, Dashboard } from "./generated";
 import { DashboardDbObject } from "./generated";
-import { connect } from "../dao";
+import { connect } from "../store";
 import { ObjectId } from "mongodb";
 import { client as coingeckoClient } from "lib/coingecko";
 
@@ -58,8 +58,9 @@ const resolvers: Resolvers = {
           supportedCurrencies,
           coins,
         };
-      } catch (error) {
-        throw error;
+      } catch(error) {
+        console.log(error)
+        throw new Error("Coingecko API Error");
       }
     },
   },
