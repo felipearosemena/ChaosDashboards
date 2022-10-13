@@ -1,5 +1,6 @@
-import { Button, Card } from "@mui/material";
+import { Button } from "@mui/material";
 import { useRouter } from "next/router";
+import { Card } from "./Layout";
 
 export const CoinInfoError = ({ message = "" }) => {
   const router = useRouter();

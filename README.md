@@ -32,5 +32,6 @@ Gets prices directly from coingecko.
 - [x] Server side storage
 - [x] Initial coin data fetching error handling
 - [x] Filter out from selected pairs in dashboard
+- [ ] Better search UX: search by coin name to filter out symbol options
 - [ ] Responsive styles
 - [ ] Graceful widget + image loading
