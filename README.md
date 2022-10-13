@@ -1,37 +1,36 @@
 # Chaos Dashboards
 
-
 ## Install and Run
 
-- Rename `.env.local.sample`
+- Rename `.env.local.sample` to `.env.local`
+- `yarn && yarn dev`
 
-`yarn && yarn dev`
-
-## Routes
+## Pages
 
 - Dashboards -> `/`
-- Dashboard -> `/dashboard/:id`
-- Add Dashboard -> `/new`
+- Dashboard by ID -> `/dashboard/:id`
+- New Dashboard -> `/new`
 
 ## API
 
-<!-- - GET  `/dashboards`
-- Add new: POST `/dashboard` -->
- 
-<!-- - Get by id: GET  `/dashboard/[id]` -->
-<!-- - Add new pair `/dashboard/[id]/pair`
+### `/api/graphql`
+Most of the API is driven via graphql. Visit `/api/graphql` in the browser to access the Yoga playground.
 
-- GET  `/coins`
-- GET  `/prices?ids=<ids>&vs_currencies=<vs_currencies>` -->
+Any Query or Mutation that interacts with a `Dashboard` or it's `CryptoPair`s reads and writes from a MongoDB instance. The credentials are saved to the `.env.local.sample` file for ease of share with the tester. In production we're remove the credentials from the file.
+
+The `coinInfo` Query pings the coingecko api directly and returns the reponse. This api is rate limited to 10 requests each 60seconds, and in my testing it can be fickle
+
+### `/api/prices`
+Gets prices directly from coingecko. 
+
+> TODO: Move this endpoint to a graphql query as well
 
 ## Improvements
 
-- [ ] Move away from localStorage. Makes application vulnerable
-- [ ] Graphql + Codegen
-- [ ] Autocomplete For Pairs
-- [ ] Server side storage
+- [x] Graphql + Codegen
+- [x] Autocomplete For Pairs
+- [x] Server side storage
 - [x] Initial coin data fetching error handling
-- [ ] Filter out from selected pairs in dashboard
-- [ ] Input sanitization for api routes
+- [x] Filter out from selected pairs in dashboard
 - [ ] Responsive styles
 - [ ] Graceful widget + image loading
