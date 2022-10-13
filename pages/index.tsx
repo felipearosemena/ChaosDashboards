@@ -1,8 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useContext, useEffect, useState } from "react";
-import { Dashboard } from "lib/types";
-import { getDashboards } from "lib/store";
+import { useContext } from "react";
 import { useRouter } from "next/router";
 import {
   Button,
@@ -16,26 +14,20 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Card } from "components/Layout";
 import Rocket from "@mui/icons-material/ChevronRight";
 import { CoinDataContext } from "components/CoinDataProvider";
-
-const useDashboards = () => {
-  const [dashboards, setDashboards] = useState<Dashboard[]>([]);
-  useEffect(() => {
-    setDashboards(getDashboards());
-  }, []);
-
-  return dashboards;
-};
+import { useDashboardsQuery } from "lib/graphql/generated";
 
 const Dashboards: NextPage = () => {
   const router = useRouter();
   const { loading, error } = useContext(CoinDataContext);
-  const dashboards = useDashboards()
+  const { data, loading: loadingDashboards, error: dashboardsError } = useDashboardsQuery({
+    fetchPolicy: 'network-only'
+  });
 
-  if (loading) {
+  if (loading || loadingDashboards) {
     return <Card>Loading</Card>;
   }
 
-  if (error) {
+  if (error || dashboardsError) {
     return (
       <Card>
         <h1>Uh oh!</h1>
@@ -43,6 +35,8 @@ const Dashboards: NextPage = () => {
       </Card>
     );
   }
+
+  const dashboards = data?.dashboards || []
 
   return (
     <div>

@@ -1,0 +1,124 @@
+import { Resolvers, Dashboard } from "./generated";
+import { DashboardDbObject } from "./generated";
+import { connect } from "../dao";
+import { ObjectId } from "mongodb";
+import { client as coingeckoClient } from "lib/coingecko";
+
+const dbPromise = connect();
+
+const getCollection = async () => {
+  const db = await dbPromise;
+  return db.collection<Omit<DashboardDbObject, "_id">>("dashboards");
+};
+
+const fromDbObject = (dbObject: DashboardDbObject): Dashboard => ({
+  id: dbObject._id.toHexString(),
+  title: dbObject.title,
+  pairs: dbObject.pairs,
+});
+
+const resolvers: Resolvers = {
+  Query: {
+    dashboards: async () => {
+      const collection = await getCollection();
+      return await collection.find().map(fromDbObject).toArray();
+    },
+    dashboard: async (_: any, { id }) => {
+      const collection = await getCollection();
+      const dbObject = await collection.findOne({
+        _id: ObjectId.createFromHexString(id),
+      });
+      return dbObject ? fromDbObject(dbObject) : null;
+    },
+    coinInfo: async (_: any) => {
+      try {
+        const [allSupportedCurrencies, coinMarket] = await Promise.all([
+          coingeckoClient.simpleSupportedCurrencies(),
+          coingeckoClient.coinMarket({
+            vs_currency: "usd",
+            ids: "",
+            per_page: 250,
+          }),
+        ]);
+
+        const coins = coinMarket.map((coin) => ({
+          id: coin.id || "",
+          name: coin.name || "",
+          symbol: coin.symbol || "",
+          image: coin.image || "",
+          price: coin.current_price || 0,
+        }));
+        const coinSymbols = coins.map((coin) => coin.symbol);
+
+        const supportedCurrencies = allSupportedCurrencies.filter(
+          (symbol) => coinSymbols.includes(symbol)
+        );
+
+        return {
+          supportedCurrencies,
+          coins,
+        };
+      } catch (error) {
+        throw error;
+      }
+    },
+  },
+  Mutation: {
+    createDashboard: async (_: any, { title }) => {
+      const collection = await getCollection();
+      const data = {
+        title,
+        pairs: [],
+      };
+      const result = await collection.insertOne(data);
+      return fromDbObject({
+        ...data,
+        _id: result.insertedId,
+      });
+    },
+    addCryptoPair: async (_: any, { dashboardId, symbol, vsCurrency }) => {
+      const collection = await getCollection();
+      const result = await collection.findOne({
+        _id: new ObjectId(dashboardId),
+      });
+
+      if (!result) {
+        throw new Error("Dashboard not found");
+      }
+
+      const { pairs } = result;
+
+      let pairExists = pairs.find(
+        (pair) => pair.symbol === symbol && pair.vsCurrency === vsCurrency
+      );
+
+      if (pairExists) {
+        throw new Error("Pair already exists");
+      }
+
+      pairs.push({
+        symbol,
+        vsCurrency,
+      });
+
+      const updated = await collection.updateOne(
+        {
+          _id: result._id,
+        },
+        {
+          $set: {
+            pairs,
+          },
+        }
+      );
+
+      if (!updated.modifiedCount) {
+        throw new Error("Failed to add pair");
+      }
+
+      return fromDbObject({ ...result, pairs });
+    },
+  },
+};
+
+export default resolvers;

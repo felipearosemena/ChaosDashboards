@@ -2,23 +2,46 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import { CoinDict, CoinPair, CoinPairOption, Dashboard, PriceResponse } from "lib/types";
-import { addPair, getDashboardById } from "lib/store";
+import { CryptoPairOption, PriceResponse } from "lib/types";
 import { CoinDataContext } from "components/CoinDataProvider";
 import { Card } from "components/Layout";
-import { Box, Grid, TextField } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { StatCardWidget } from "components/StatCardWidget";
 import Autocomplete from "components/Autocomplete";
+import {
+  useDashboardByIdQuery,
+  useAddCryptoPairMutation,
+  DashboardByIdDocument,
+  Coin,
+  CoinInfo,
+  CryptoPair,
+} from "lib/graphql/generated";
+
+type CoinDict = { [key: string]: Coin };
+
+const useCoinDict = (coinInfo?: CoinInfo) => {
+  const [coinDict, setCoinDict] = useState<CoinDict>({});
+
+  useEffect(() => {
+    if (coinInfo) {
+      let newDict: CoinDict = {};
+      coinInfo.coins.forEach((coin) => (newDict[coin.symbol] = coin));
+      setCoinDict(newDict);
+    }
+  }, [coinInfo]);
+
+  return coinDict;
+};
 
 const getPrices = async (
-  pairs: CoinPair[] = [],
-  coins: CoinDict,
+  pairs: CryptoPair[] = [],
+  coinDict: CoinDict = {},
   onResult: (prices: PriceResponse) => void
 ) => {
   const ids = pairs
     .map((pair) => {
       const { symbol } = pair;
-      const coin = coins[symbol];
+      const coin = coinDict[symbol];
       return coin?.id;
     })
     .filter((id) => id)
@@ -36,43 +59,42 @@ const getPrices = async (
   }
 };
 
-const Dashboard: NextPage = () => {
+const DashboardPage: NextPage = () => {
   const router = useRouter();
-  const { id } = router.query;
-  const [dashboard, setDashboard] = useState<Dashboard>();
-  const {
-    data: { supportedCurrencies, coins },
-    loading,
-  } = useContext(CoinDataContext);
-  const [options, setOptions] = useState<CoinPairOption[]>([]);
+  const { coinInfo, loading: loadingCoinInfo } = useContext(CoinDataContext);
+  const id = typeof router.query.id === "string" ? router.query.id : "";
+  const { data, loading: loadingDashboard } = useDashboardByIdQuery({
+    variables: { id },
+    skip: !id.length,
+  });
+  const [addCryptoPair] = useAddCryptoPairMutation({
+    refetchQueries: [{ query: DashboardByIdDocument, variables: { id } }],
+  });
+  const coinDict = useCoinDict(coinInfo);
+  const dashboard = data?.dashboard;
+  const pairs = dashboard ? [...dashboard.pairs] : [];
+  const [options, setOptions] = useState<CryptoPairOption[]>([]);
   const [prices, setPrices] = useState<PriceResponse>({});
-  const hasCoins = !!Object.values(coins).length;
-
-  const getDashboard = () => {
-    if (typeof id === "string") {
-      const dashboard = getDashboardById(id);
-
-      if (dashboard) {
-        setDashboard(dashboard);
-      }
-    }
-  };
+  const hasCoins = !!Object.values(coinDict).length;
 
   const addNewPair = (newSymbol: string, newVsCurrency: string) => {
-    if (!dashboard || !newSymbol || !newVsCurrency) {
-      return;
+    const dashboardId = dashboard?.id;
+    if (dashboardId) {
+      addCryptoPair({
+        variables: {
+          dashboardId,
+          symbol: newSymbol,
+          vsCurrency: newVsCurrency,
+        },
+      });
     }
-
-    addPair(dashboard.id, newSymbol, newVsCurrency);
-    getDashboard();
   };
 
   useEffect(() => {
-    const coinValues = Object.values(coins);
-    if (coinValues.length) {
-      const options = supportedCurrencies
+    if (coinInfo) {
+      const options = coinInfo.supportedCurrencies
         .map((vsCurrency) => {
-          return coinValues
+          return coinInfo.coins
             .filter((coin) => coin.symbol && coin.symbol !== vsCurrency)
             .map(({ symbol = "" }) => {
               const value = vsCurrency + "/" + symbol;
@@ -91,28 +113,21 @@ const Dashboard: NextPage = () => {
             });
         })
         .flat();
-
       setOptions(options);
     }
-  }, [dashboard, supportedCurrencies, coins]);
+  }, [dashboard, coinInfo]);
 
   useEffect(() => {
-    if (dashboard?.pairs && Object.values(coins).length) {
-      getPrices(dashboard.pairs, coins, setPrices);
+    if (dashboard?.pairs && Object.values(coinDict).length) {
+      getPrices(dashboard.pairs, coinDict, setPrices);
     }
-  }, [coins, dashboard]);
-
-  useEffect(() => {
-    if (!dashboard) {
-      getDashboard();
-    }
-  }, [id]);
+  }, [coinDict, dashboard]);
 
   if (!dashboard) {
     return null;
   }
 
-  if (loading) {
+  if (loadingCoinInfo || loadingDashboard) {
     return <Card>Loading</Card>;
   }
 
@@ -138,14 +153,14 @@ const Dashboard: NextPage = () => {
           </Card>
         </Box>
         <Grid container spacing={3}>
-          {dashboard &&
-            hasCoins &&
-            dashboard.pairs.sort().map((pair) => {
-              const coin = coins[pair.symbol];
-              const vsCoin = coins[pair.vsCurrency];
+          {hasCoins &&
+            !!pairs.length &&
+            pairs.sort().map((pair) => {
+              const coin = coinDict[pair.symbol];
+              const vsCoin = coinDict[pair.vsCurrency];
 
-              const coinId = coin.id || "";
-              const vsCurrencySumbol = vsCoin.symbol || "";
+              const coinId = coin?.id || "";
+              const vsCurrencySumbol = vsCoin?.symbol || "";
               let price;
 
               if (
@@ -168,4 +183,4 @@ const Dashboard: NextPage = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardPage;

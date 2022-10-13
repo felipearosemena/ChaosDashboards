@@ -1,5 +1,5 @@
 import { styled, Typography } from "@mui/material";
-import { Coin } from "lib/types";
+import { Coin } from "lib/graphql/generated";
 import { Card } from "./Layout";
 
 type StatCardWidgetProps = {

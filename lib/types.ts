@@ -1,28 +1,6 @@
-export type Coin = {
-  id?: string;
-  symbol?: string;
-  name?: string;
-  image?: string;
-  price?: number;
-};
+import { CryptoPair } from "./graphql/generated";
 
-export type CoinPair = { symbol: string; vsCurrency: string };
-export type CoinPairOption = CoinPair & { value: string; disabled: boolean };
-
-export type CoinDict = {
-  [symbol: string]: Coin;
-};
-
-export type CoinResponse = {
-  supportedCurrencies: string[];
-  coins: CoinDict;
-};
-
-export type Dashboard = {
-  id: string;
-  title: string;
-  pairs: CoinPair[];
-};
+export type CryptoPairOption = CryptoPair & { value: string; disabled: boolean };
 
 export type PriceResponse = {
   [coin: string]: {

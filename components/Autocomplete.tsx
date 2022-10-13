@@ -7,7 +7,7 @@ import Popper from "@mui/material/Popper";
 import { useTheme, styled } from "@mui/material/styles";
 import { VariableSizeList, ListChildComponentProps } from "react-window";
 import Typography from "@mui/material/Typography";
-import { CoinPairOption } from "lib/types";
+import { CryptoPairOption } from "lib/types";
 
 const LISTBOX_PADDING = 8; // px
 
@@ -122,8 +122,8 @@ const StyledPopper = styled(Popper)({
 });
 
 type VirtualizedAutocompleteProps = {
-  options: CoinPairOption[];
-  onChange: (option: CoinPairOption) => void;
+  options: CryptoPairOption[];
+  onChange: (option: CryptoPairOption) => void;
 };
 
 export default function VirtualizedAutocomplete({
