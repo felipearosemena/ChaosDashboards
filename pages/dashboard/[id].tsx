@@ -131,10 +131,6 @@ const DashboardPage: NextPage = () => {
     }
   }, [coinDict, dashboard, hasCoins]);
 
-  if (!dashboard) {
-    return null;
-  }
-
   if (loadingCoinInfo || loadingDashboard) {
     const label = [loadingCoinInfo && "tokens", loadingCoinInfo && "dashboards"]
       .filter((v) => v)
@@ -149,14 +145,14 @@ const DashboardPage: NextPage = () => {
   return (
     <div>
       <Head>
-        <title>Dashboard: {dashboard.title}</title>
+        <title>Dashboard: {dashboard?.title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main>
         <Box mb={3}>
           <Card>
-            <h1>{dashboard.title}</h1>
+            <h1>{dashboard?.title}</h1>
 
             <Autocomplete
               key={"vscurrency-" + dashboard?.pairs.length}

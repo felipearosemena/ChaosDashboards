@@ -6,6 +6,7 @@ import {
   Button,
   Chip,
   Divider,
+  IconButton,
   List,
   ListItemButton,
   ListItemText,
@@ -14,8 +15,13 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Card } from "components/Layout";
 import Rocket from "@mui/icons-material/ChevronRight";
 import { CoinDataContext } from "components/CoinDataProvider";
-import { useDashboardsQuery } from "lib/graphql/generated";
+import {
+  DashboardsDocument,
+  useDashboardsQuery,
+  useDeleteDashboardMutation,
+} from "lib/graphql/generated";
 import { CoinInfoError } from "components/CoinInfoError";
+import { Close } from "@mui/icons-material";
 
 const Dashboards: NextPage = () => {
   const router = useRouter();
@@ -23,6 +29,9 @@ const Dashboards: NextPage = () => {
     useContext(CoinDataContext);
   const { data, loading: loadingDashboards } = useDashboardsQuery({
     fetchPolicy: "cache-first",
+  });
+  const [deleteDashboard, { loading: deleting }] = useDeleteDashboardMutation({
+    refetchQueries: [{ query: DashboardsDocument }],
   });
 
   if (loadingCoinInfo || loadingDashboards) {
@@ -78,13 +87,23 @@ const Dashboards: NextPage = () => {
                       disableRipple
                       key={dashboard.id}
                       onClick={() => router.push(`/dashboard/${dashboard.id}`)}
+                      disabled={deleting}
                     >
                       <ListItemText primary={dashboard.title} />
                       {chips}{" "}
                       {!!chipOverflow && (
                         <Chip size={"small"} label={`${chipOverflow} more`} />
                       )}
-                      <ChevronRight />
+                      <IconButton
+                        disabled={deleting}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          deleteDashboard({ variables: { id: dashboard.id } });
+                        }}
+                      >
+                        <Close />
+                      </IconButton>
                     </ListItemButton>
                   );
                 })}

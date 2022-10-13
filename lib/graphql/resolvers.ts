@@ -77,6 +77,18 @@ const resolvers: Resolvers = {
         _id: result.insertedId,
       });
     },
+    deleteDashboard: async (_: any, { id }) => {
+      const collection = await getCollection();
+      const result = await collection.deleteOne({
+        _id: ObjectId.createFromHexString(id),
+      });
+
+      if (result.deletedCount) {
+        return true
+      } else {
+        throw new Error(`Failed to delete dashboard id: ${id}`)
+      }
+    },
     addCryptoPair: async (_: any, { dashboardId, symbol, vsCurrency }) => {
       const collection = await getCollection();
       const result = await collection.findOne({

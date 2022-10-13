@@ -9,6 +9,7 @@ export const typeDefs = gql`
 
   type Mutation {
     createDashboard(title: String!): Dashboard!
+    deleteDashboard(id: ID!): Boolean
     addCryptoPair(dashboardId: ID!, symbol: String!, vsCurrency: String!): Dashboard!
   }
 

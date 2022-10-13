@@ -53,6 +53,7 @@ export type Dashboard = {
 export type Mutation = {
   addCryptoPair: Dashboard;
   createDashboard: Dashboard;
+  deleteDashboard?: Maybe<Scalars["Boolean"]>;
 };
 
 export type MutationAddCryptoPairArgs = {
@@ -63,6 +64,10 @@ export type MutationAddCryptoPairArgs = {
 
 export type MutationCreateDashboardArgs = {
   title: Scalars["String"];
+};
+
+export type MutationDeleteDashboardArgs = {
+  id: Scalars["ID"];
 };
 
 export type Query = {
@@ -195,9 +200,9 @@ export type ResolversTypes = {
   Dashboard: ResolverTypeWrapper<Dashboard>;
   Mutation: ResolverTypeWrapper<{}>;
   ID: ResolverTypeWrapper<Scalars["ID"]>;
+  Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   Query: ResolverTypeWrapper<{}>;
   AdditionalEntityFields: AdditionalEntityFields;
-  Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -210,9 +215,9 @@ export type ResolversParentTypes = {
   Dashboard: Dashboard;
   Mutation: {};
   ID: Scalars["ID"];
+  Boolean: Scalars["Boolean"];
   Query: {};
   AdditionalEntityFields: AdditionalEntityFields;
-  Boolean: Scalars["Boolean"];
 };
 
 export type UnionDirectiveArgs = {
@@ -369,6 +374,12 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationCreateDashboardArgs, "title">
   >;
+  deleteDashboard?: Resolver<
+    Maybe<ResolversTypes["Boolean"]>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationDeleteDashboardArgs, "id">
+  >;
 };
 
 export type QueryResolvers<
@@ -463,6 +474,12 @@ export type CreateDashboardMutation = {
     pairs: Array<{ symbol: string; vsCurrency: string }>;
   };
 };
+
+export type DeleteDashboardMutationVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type DeleteDashboardMutation = { deleteDashboard?: boolean | null };
 
 export type AddCryptoPairMutationVariables = Exact<{
   dashboardId: Scalars["ID"];
@@ -716,6 +733,55 @@ export type CreateDashboardMutationOptions =
   ApolloReactCommon.BaseMutationOptions<
     CreateDashboardMutation,
     CreateDashboardMutationVariables
+  >;
+export const DeleteDashboardDocument = gql`
+  mutation DeleteDashboard($id: ID!) {
+    deleteDashboard(id: $id)
+  }
+`;
+export type DeleteDashboardMutationFn = ApolloReactCommon.MutationFunction<
+  DeleteDashboardMutation,
+  DeleteDashboardMutationVariables
+>;
+
+/**
+ * __useDeleteDashboardMutation__
+ *
+ * To run a mutation, you first call `useDeleteDashboardMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteDashboardMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteDashboardMutation, { data, loading, error }] = useDeleteDashboardMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteDashboardMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    DeleteDashboardMutation,
+    DeleteDashboardMutationVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useMutation<
+    DeleteDashboardMutation,
+    DeleteDashboardMutationVariables
+  >(DeleteDashboardDocument, options);
+}
+export type DeleteDashboardMutationHookResult = ReturnType<
+  typeof useDeleteDashboardMutation
+>;
+export type DeleteDashboardMutationResult =
+  ApolloReactCommon.MutationResult<DeleteDashboardMutation>;
+export type DeleteDashboardMutationOptions =
+  ApolloReactCommon.BaseMutationOptions<
+    DeleteDashboardMutation,
+    DeleteDashboardMutationVariables
   >;
 export const AddCryptoPairDocument = gql`
   mutation AddCryptoPair(

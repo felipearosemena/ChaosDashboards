@@ -41,6 +41,10 @@ export const typeDefs = gql`
     }
   }
 
+  mutation DeleteDashboard($id: ID!) {
+    deleteDashboard(id: $id)
+  }
+
   mutation AddCryptoPair(
     $dashboardId: ID!
     $symbol: String!
