@@ -1,42 +1,6 @@
 import { useMemo } from "react";
-import {
-  Coin,
-  CoinInfo,
-  CryptoPair,
-  Dashboard,
-  PriceResponse,
-} from "./graphql/generated";
+import { CoinInfo, CryptoPair, Dashboard } from "./graphql/generated";
 import { CryptoPairOption } from "components/Autocomplete";
-
-type CoinDict = { [key: string]: Coin };
-type PriceDict = { [key: string]: number | undefined };
-
-export const useCoinDict = (coinInfo?: CoinInfo) => {
-  return useMemo(() => {
-    if (coinInfo) {
-      let newDict: CoinDict = {};
-      coinInfo.coins.forEach((coin) => (newDict[coin.symbol] = coin));
-      return newDict;
-    } else {
-      return {};
-    }
-  }, [coinInfo]);
-};
-
-export const usePriceDict = (prices?: PriceResponse[]) => {
-  return useMemo(() => {
-    if (prices) {
-      let newDict: PriceDict = {};
-      prices.forEach(
-        ({ price, coinId, vsCurrency }) =>
-          (newDict[`${coinId}-${vsCurrency}`] = price)
-      );
-      return newDict;
-    } else {
-      return {};
-    }
-  }, [prices]);
-};
 
 const isOptionDisabled = (
   pairs: CryptoPair[] = [],
