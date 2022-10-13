@@ -6,10 +6,12 @@ Public url at: https://chaos-dashboards.vercel.app/
 
 <img src="https://user-images.githubusercontent.com/6720312/195651293-f5c4bdb5-827f-4651-b82c-a9a113dbea75.png" width="720" />
 
-## Install and Run
+## Install and start the server
 
 - `mv .env.local.sample .env.local`
-- `yarn && yarn dev`
+- `yarn && yarn build && yarn start`
+
+Once the server starts, visit: `http://localhost:3000`
 
 > Requires node >=16: `nvm use 16`
 ## Pages
