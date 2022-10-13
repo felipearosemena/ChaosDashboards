@@ -7,9 +7,11 @@ import Popper from "@mui/material/Popper";
 import { useTheme, styled } from "@mui/material/styles";
 import { VariableSizeList, ListChildComponentProps } from "react-window";
 import Typography from "@mui/material/Typography";
-import { CryptoPairOption } from "lib/types";
+import { CryptoPair } from "lib/graphql/generated";
 
 const LISTBOX_PADDING = 8; // px
+
+export type CryptoPairOption = CryptoPair & { label: string; disabled: boolean };
 
 function renderRow(props: ListChildComponentProps) {
   const { data, index, style } = props;
