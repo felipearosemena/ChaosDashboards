@@ -9,7 +9,7 @@ export const CoinInfoError = ({ message = "" }) => {
     <Card>
       <h1>Error loading tokens</h1>
       <p>{message}</p>
-      <Button onClick={() => router.reload()}>Reload</Button>
+      <Button variant="outlined" size="large" onClick={() => router.reload()}>Reload</Button>
     </Card>
   );
 };
