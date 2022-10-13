@@ -40,7 +40,8 @@ export type CoinInfo = {
 };
 
 export type CryptoPair = {
-  symbol: Scalars["String"];
+  coinId: Scalars["String"];
+  price?: Maybe<Scalars["Float"]>;
   vsCurrency: Scalars["String"];
 };
 
@@ -57,8 +58,8 @@ export type Mutation = {
 };
 
 export type MutationAddCryptoPairArgs = {
+  coinId: Scalars["String"];
   dashboardId: Scalars["ID"];
-  symbol: Scalars["String"];
   vsCurrency: Scalars["String"];
 };
 
@@ -350,7 +351,8 @@ export type CryptoPairResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["CryptoPair"] = ResolversParentTypes["CryptoPair"]
 > = {
-  symbol?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  coinId?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  price?: Resolver<Maybe<ResolversTypes["Float"]>, ParentType, ContextType>;
   vsCurrency?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -379,7 +381,7 @@ export type MutationResolvers<
     ContextType,
     RequireFields<
       MutationAddCryptoPairArgs,
-      "dashboardId" | "symbol" | "vsCurrency"
+      "coinId" | "dashboardId" | "vsCurrency"
     >
   >;
   createDashboard?: Resolver<
@@ -454,7 +456,7 @@ export type DirectiveResolvers<ContextType = any> = {
 export type DashboardFragmentFragment = {
   id: string;
   title: string;
-  pairs: Array<{ symbol: string; vsCurrency: string }>;
+  pairs: Array<{ coinId: string; vsCurrency: string; price?: number | null }>;
 };
 
 export type CoinInfoQueryVariables = Exact<{ [key: string]: never }>;
@@ -487,7 +489,7 @@ export type DashboardsQuery = {
   dashboards: Array<{
     id: string;
     title: string;
-    pairs: Array<{ symbol: string; vsCurrency: string }>;
+    pairs: Array<{ coinId: string; vsCurrency: string; price?: number | null }>;
   }>;
 };
 
@@ -499,7 +501,7 @@ export type DashboardByIdQuery = {
   dashboard?: {
     id: string;
     title: string;
-    pairs: Array<{ symbol: string; vsCurrency: string }>;
+    pairs: Array<{ coinId: string; vsCurrency: string; price?: number | null }>;
   } | null;
 };
 
@@ -511,7 +513,7 @@ export type CreateDashboardMutation = {
   createDashboard: {
     id: string;
     title: string;
-    pairs: Array<{ symbol: string; vsCurrency: string }>;
+    pairs: Array<{ coinId: string; vsCurrency: string; price?: number | null }>;
   };
 };
 
@@ -523,7 +525,7 @@ export type DeleteDashboardMutation = { deleteDashboard?: boolean | null };
 
 export type AddCryptoPairMutationVariables = Exact<{
   dashboardId: Scalars["ID"];
-  symbol: Scalars["String"];
+  coinId: Scalars["String"];
   vsCurrency: Scalars["String"];
 }>;
 
@@ -531,7 +533,7 @@ export type AddCryptoPairMutation = {
   addCryptoPair: {
     id: string;
     title: string;
-    pairs: Array<{ symbol: string; vsCurrency: string }>;
+    pairs: Array<{ coinId: string; vsCurrency: string; price?: number | null }>;
   };
 };
 
@@ -540,8 +542,9 @@ export const DashboardFragmentFragmentDoc = gql`
     id
     title
     pairs {
-      symbol
+      coinId
       vsCurrency
+      price
     }
   }
 `;
@@ -883,12 +886,12 @@ export type DeleteDashboardMutationOptions =
 export const AddCryptoPairDocument = gql`
   mutation AddCryptoPair(
     $dashboardId: ID!
-    $symbol: String!
+    $coinId: String!
     $vsCurrency: String!
   ) {
     addCryptoPair(
       dashboardId: $dashboardId
-      symbol: $symbol
+      coinId: $coinId
       vsCurrency: $vsCurrency
     ) {
       ...DashboardFragment
@@ -915,7 +918,7 @@ export type AddCryptoPairMutationFn = ApolloReactCommon.MutationFunction<
  * const [addCryptoPairMutation, { data, loading, error }] = useAddCryptoPairMutation({
  *   variables: {
  *      dashboardId: // value for 'dashboardId'
- *      symbol: // value for 'symbol'
+ *      coinId: // value for 'coinId'
  *      vsCurrency: // value for 'vsCurrency'
  *   },
  * });

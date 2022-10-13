@@ -1,5 +1,11 @@
 import { useMemo } from "react";
-import { Coin, CoinInfo, CryptoPair, Dashboard, PriceResponse } from "./graphql/generated";
+import {
+  Coin,
+  CoinInfo,
+  CryptoPair,
+  Dashboard,
+  PriceResponse,
+} from "./graphql/generated";
 import { CryptoPairOption } from "components/Autocomplete";
 
 type CoinDict = { [key: string]: Coin };
@@ -34,12 +40,12 @@ export const usePriceDict = (prices?: PriceResponse[]) => {
 
 const isOptionDisabled = (
   pairs: CryptoPair[] = [],
-  symbol: string,
+  coinId: string,
   vsCurrency: string
 ) => {
   return pairs
     ? !!pairs.find(
-        (pair) => pair.symbol === symbol && pair.vsCurrency === vsCurrency
+        (pair) => pair.coinId === coinId && pair.vsCurrency === vsCurrency
       )
     : false;
 };
@@ -56,15 +62,15 @@ export const useCryptoPairOptions = (
         .map((vsCurrency) => {
           return coinInfo.coins
             .filter((coin) => coin.symbol && coin.symbol !== vsCurrency)
-            .map(({ symbol = "" }) => {
+            .map(({ symbol = "", id }) => {
               const label = vsCurrency + "/" + symbol;
               const disabled = isOptionDisabled(
                 dashboard.pairs,
-                symbol,
+                id,
                 vsCurrency
               );
               return {
-                symbol,
+                coinId: id,
                 vsCurrency,
                 label,
                 disabled,

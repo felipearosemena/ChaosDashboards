@@ -66,21 +66,6 @@ const Dashboards: NextPage = () => {
                 <Divider />
                 {dashboards.map((dashboard) => {
                   const { pairs } = dashboard;
-                  const maxToShow = 3;
-                  const pairsToShow = pairs.slice(0, maxToShow);
-                  const chipOverflow =
-                    pairs.length > maxToShow ? pairs.length - maxToShow : 0;
-                  const chips = pairsToShow
-                    .map((p) => `${p.vsCurrency}/${p.symbol}`)
-                    .map((label) => (
-                      <Chip
-                        key={label}
-                        label={label}
-                        size={"small"}
-                        style={{ margin: "4px" }}
-                      />
-                    ));
-
                   return (
                     <ListItemButton
                       disableRipple
@@ -89,9 +74,9 @@ const Dashboards: NextPage = () => {
                       disabled={deleting}
                     >
                       <ListItemText primary={dashboard.title} />
-                      {chips}{" "}
-                      {!!chipOverflow && (
-                        <Chip size={"small"} label={`${chipOverflow} more`} />
+
+                      {!!pairs.length && (
+                        <Chip size={"small"} label={`${pairs.length}`} />
                       )}
                       <IconButton
                         disabled={deleting}

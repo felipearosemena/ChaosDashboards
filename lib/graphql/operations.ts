@@ -5,8 +5,9 @@ export const typeDefs = gql`
     id
     title
     pairs {
-      symbol
+      coinId
       vsCurrency
+      price
     }
   }
 
@@ -55,12 +56,12 @@ export const typeDefs = gql`
 
   mutation AddCryptoPair(
     $dashboardId: ID!
-    $symbol: String!
+    $coinId: String!
     $vsCurrency: String!
   ) {
     addCryptoPair(
       dashboardId: $dashboardId
-      symbol: $symbol
+      coinId: $coinId
       vsCurrency: $vsCurrency
     ) {
       ...DashboardFragment

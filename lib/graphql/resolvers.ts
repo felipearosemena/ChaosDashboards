@@ -17,6 +17,32 @@ const fromDbObject = (dbObject: DashboardDbObject): Dashboard => ({
   pairs: dbObject.pairs,
 });
 
+const fetchPrices = async (ids: string[], vsCurrencies: string[]) => {
+  try {
+    const response = await coingeckoClient.simplePrice({
+      ids: ids.join(","),
+      vs_currencies: vsCurrencies.join(","),
+    });
+
+    const prices: PriceResponse[] = [];
+    for (const [coinId] of Object.entries(response)) {
+      const responseVsCurrencies = response[coinId];
+      for (const [vsCurrency, price] of Object.entries(responseVsCurrencies)) {
+        prices.push({
+          coinId,
+          vsCurrency,
+          price: 1 / price, // Need to invert the value due to how coingecko returns the values
+        });
+      }
+    }
+
+    return prices;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Coingecko API Error");
+  }
+};
+
 const resolvers: Resolvers = {
   Query: {
     dashboards: async () => {
@@ -28,7 +54,24 @@ const resolvers: Resolvers = {
       const dbObject = await collection.findOne({
         _id: ObjectId.createFromHexString(id),
       });
-      return dbObject ? fromDbObject(dbObject) : null;
+
+      const result = dbObject ? fromDbObject(dbObject) : null;
+
+      if (result?.pairs.length) {
+        const { pairs } = result;
+        const ids = pairs.map((p) => p.coinId);
+        const vsCurrencies = pairs.map((p) => p.vsCurrency);
+        const prices = await fetchPrices(ids, vsCurrencies);
+        pairs.forEach((pair) => {
+          pair.price = prices.find(
+            (price) =>
+              price.coinId === pair.coinId &&
+              price.vsCurrency === pair.vsCurrency
+          )?.price;
+        });
+      }
+
+      return result;
     },
     coinInfo: async (_: any) => {
       try {
@@ -63,31 +106,8 @@ const resolvers: Resolvers = {
         throw new Error("Coingecko API Error");
       }
     },
-    prices: async (_: any, { ids, vsCurrencies }) => {
-      try {
-        const response = await coingeckoClient.simplePrice({
-          ids: ids.join(','),
-          vs_currencies: vsCurrencies.join(','),
-        });
-        
-        const prices: PriceResponse[] = []
-        for (const [coinId] of Object.entries(response)) {
-          const responseVsCurrencies = response[coinId]
-          for (const [vsCurrency, price] of Object.entries(responseVsCurrencies)) {
-            prices.push({
-              coinId,
-              vsCurrency,
-              price: 1 / price // Need to invert the value due to how coingecko returns the values
-            })
-          }
-        }
-
-        return prices
-      } catch(error) {
-        console.log(error);
-        throw new Error("Coingecko API Error");
-      }
-    },
+    prices: async (_: any, { ids, vsCurrencies }) =>
+      fetchPrices(ids, vsCurrencies),
   },
   Mutation: {
     createDashboard: async (_: any, { title }) => {
@@ -114,7 +134,7 @@ const resolvers: Resolvers = {
         throw new Error(`Failed to delete dashboard id: ${id}`);
       }
     },
-    addCryptoPair: async (_: any, { dashboardId, symbol, vsCurrency }) => {
+    addCryptoPair: async (_: any, { dashboardId, coinId, vsCurrency }) => {
       const collection = await getCollection();
       const result = await collection.findOne({
         _id: new ObjectId(dashboardId),
@@ -127,7 +147,7 @@ const resolvers: Resolvers = {
       const { pairs } = result;
 
       let pairExists = pairs.find(
-        (pair) => pair.symbol === symbol && pair.vsCurrency === vsCurrency
+        (pair) => pair.coinId === coinId && pair.vsCurrency === vsCurrency
       );
 
       if (pairExists) {
@@ -135,7 +155,7 @@ const resolvers: Resolvers = {
       }
 
       pairs.push({
-        symbol,
+        coinId,
         vsCurrency,
       });
 

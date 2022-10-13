@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { CoinDataContext } from "components/CoinDataProvider";
 import { Card } from "components/Layout";
 import { Box, Grid } from "@mui/material";
@@ -11,10 +11,9 @@ import {
   useDashboardByIdQuery,
   useAddCryptoPairMutation,
   DashboardByIdDocument,
-  usePricesLazyQuery,
 } from "lib/graphql/generated";
 import { CoinInfoError } from "components/CoinInfoError";
-import { useCoinDict, useCryptoPairOptions, usePriceDict } from "lib/utils";
+import { useCryptoPairOptions } from "lib/utils";
 
 const DashboardPage: NextPage = () => {
   const router = useRouter();
@@ -32,48 +31,22 @@ const DashboardPage: NextPage = () => {
   const [addCryptoPair] = useAddCryptoPairMutation({
     refetchQueries: [{ query: DashboardByIdDocument, variables: { id } }],
   });
-  const [getPrices, { data: priceData }] = usePricesLazyQuery();
   const coinInfo = coinInfoData?.coinInfo;
-  const coinDict = useCoinDict(coinInfo);
-  const priceDict = usePriceDict(priceData?.prices);
   const dashboard = data?.dashboard;
   const options = useCryptoPairOptions(coinInfo, dashboard);
-  const hasCoins = !!Object.values(coinDict).length;
 
-  const addNewPair = (newSymbol: string, newVsCurrency: string) => {
+  const addNewPair = (newCoinId: string, newVsCurrency: string) => {
     const dashboardId = dashboard?.id;
     if (dashboardId) {
       addCryptoPair({
         variables: {
           dashboardId,
-          symbol: newSymbol,
+          coinId: newCoinId,
           vsCurrency: newVsCurrency,
         },
       });
     }
   };
-
-  useEffect(() => {
-    if (dashboard?.pairs && hasCoins) {
-      const { pairs } = dashboard;
-      const ids = pairs
-        .map((pair) => {
-          const { symbol } = pair;
-          const coin = coinDict[symbol];
-          return coin?.id;
-        })
-        .filter((id) => id);
-
-      const vsCurrencies = pairs.map((p) => p.vsCurrency);
-
-      getPrices({
-        variables: {
-          ids,
-          vsCurrencies,
-        },
-      });
-    }
-  }, [getPrices, coinDict, dashboard, hasCoins]);
 
   if (loadingCoinInfo || loadingDashboard) {
     const label = [loadingCoinInfo && "tokens", loadingCoinInfo && "dashboards"]
@@ -102,26 +75,29 @@ const DashboardPage: NextPage = () => {
               key={"vscurrency-" + dashboard?.pairs.length}
               options={options}
               onChange={(option) =>
-                addNewPair(option.symbol, option.vsCurrency)
+                addNewPair(option.coinId, option.vsCurrency)
               }
             />
           </Card>
         </Box>
         <Grid container spacing={3}>
-          {hasCoins &&
-            !!dashboard?.pairs.length &&
-            dashboard?.pairs.map((pair) => {
-              const coin = coinDict[pair.symbol];
-              const vsCoin = coinDict[pair.vsCurrency];
-
-              const coinId = coin?.id || "";
-              const vsCurrency = vsCoin?.symbol || "";
-
-              let price = priceDict[`${coinId}-${vsCurrency}`]
+          {dashboard?.pairs.map((pair) => {
+              const coin = coinInfo?.coins.find(
+                (coin) => coin.id === pair.coinId
+              );
+              const vsCoin = coinInfo?.coins.find(
+                (coin) => coin.symbol === pair.vsCurrency
+              );
 
               return (
-                <Grid item xs={6} key={`${pair.symbol}-${pair.vsCurrency}`}>
-                  <StatCardWidget coin={coin} vsCoin={vsCoin} price={price} />
+                <Grid item xs={6} key={`${pair.coinId}-${pair.vsCurrency}`}>
+                  {coin && vsCoin && (
+                    <StatCardWidget
+                      coin={coin}
+                      vsCoin={vsCoin}
+                      price={pair.price}
+                    />
+                  )}
                 </Grid>
               );
             })}

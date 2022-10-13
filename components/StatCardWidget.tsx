@@ -5,7 +5,7 @@ import { Card } from "./Layout";
 type StatCardWidgetProps = {
   coin: Coin;
   vsCoin: Coin;
-  price?: number;
+  price?: number | null;
 };
 
 const CardGrid = styled("div")({ display: "grid", gap: 8 });

@@ -11,7 +11,7 @@ export const typeDefs = gql`
   type Mutation {
     createDashboard(title: String!): Dashboard!
     deleteDashboard(id: ID!): Boolean
-    addCryptoPair(dashboardId: ID!, symbol: String!, vsCurrency: String!): Dashboard!
+    addCryptoPair(dashboardId: ID!, coinId: String!, vsCurrency: String!): Dashboard!
   }
 
   type CoinInfo {
@@ -28,8 +28,9 @@ export const typeDefs = gql`
   }
 
   type CryptoPair {
-    symbol: String!
+    coinId: String!
     vsCurrency: String!
+    price: Float
   }
 
   type PriceResponse {
