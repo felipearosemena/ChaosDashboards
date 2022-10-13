@@ -70,14 +70,26 @@ export type MutationDeleteDashboardArgs = {
   id: Scalars["ID"];
 };
 
+export type PriceResponse = {
+  coinId: Scalars["String"];
+  price: Scalars["Float"];
+  vsCurrency: Scalars["String"];
+};
+
 export type Query = {
   coinInfo: CoinInfo;
   dashboard?: Maybe<Dashboard>;
   dashboards: Array<Dashboard>;
+  prices: Array<PriceResponse>;
 };
 
 export type QueryDashboardArgs = {
   id: Scalars["ID"];
+};
+
+export type QueryPricesArgs = {
+  ids: Array<Scalars["String"]>;
+  vsCurrencies: Array<Scalars["String"]>;
 };
 
 export type AdditionalEntityFields = {
@@ -201,6 +213,7 @@ export type ResolversTypes = {
   Mutation: ResolverTypeWrapper<{}>;
   ID: ResolverTypeWrapper<Scalars["ID"]>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
+  PriceResponse: ResolverTypeWrapper<PriceResponse>;
   Query: ResolverTypeWrapper<{}>;
   AdditionalEntityFields: AdditionalEntityFields;
 };
@@ -216,6 +229,7 @@ export type ResolversParentTypes = {
   Mutation: {};
   ID: Scalars["ID"];
   Boolean: Scalars["Boolean"];
+  PriceResponse: PriceResponse;
   Query: {};
   AdditionalEntityFields: AdditionalEntityFields;
 };
@@ -382,6 +396,16 @@ export type MutationResolvers<
   >;
 };
 
+export type PriceResponseResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["PriceResponse"] = ResolversParentTypes["PriceResponse"]
+> = {
+  coinId?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  price?: Resolver<ResolversTypes["Float"], ParentType, ContextType>;
+  vsCurrency?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type QueryResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
@@ -398,6 +422,12 @@ export type QueryResolvers<
     ParentType,
     ContextType
   >;
+  prices?: Resolver<
+    Array<ResolversTypes["PriceResponse"]>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryPricesArgs, "ids" | "vsCurrencies">
+  >;
 };
 
 export type Resolvers<ContextType = any> = {
@@ -406,6 +436,7 @@ export type Resolvers<ContextType = any> = {
   CryptoPair?: CryptoPairResolvers<ContextType>;
   Dashboard?: DashboardResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  PriceResponse?: PriceResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
 };
 
@@ -439,6 +470,15 @@ export type CoinInfoQuery = {
       price: number;
     }>;
   };
+};
+
+export type PricesQueryVariables = Exact<{
+  ids: Array<Scalars["String"]> | Scalars["String"];
+  vsCurrencies: Array<Scalars["String"]> | Scalars["String"];
+}>;
+
+export type PricesQuery = {
+  prices: Array<{ coinId: string; vsCurrency: string; price: number }>;
 };
 
 export type DashboardsQueryVariables = Exact<{ [key: string]: never }>;
@@ -566,6 +606,63 @@ export type CoinInfoLazyQueryHookResult = ReturnType<
 export type CoinInfoQueryResult = ApolloReactCommon.QueryResult<
   CoinInfoQuery,
   CoinInfoQueryVariables
+>;
+export const PricesDocument = gql`
+  query Prices($ids: [String!]!, $vsCurrencies: [String!]!) {
+    prices(ids: $ids, vsCurrencies: $vsCurrencies) {
+      coinId
+      vsCurrency
+      price
+    }
+  }
+`;
+
+/**
+ * __usePricesQuery__
+ *
+ * To run a query within a React component, call `usePricesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePricesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePricesQuery({
+ *   variables: {
+ *      ids: // value for 'ids'
+ *      vsCurrencies: // value for 'vsCurrencies'
+ *   },
+ * });
+ */
+export function usePricesQuery(
+  baseOptions: ApolloReactHooks.QueryHookOptions<
+    PricesQuery,
+    PricesQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useQuery<PricesQuery, PricesQueryVariables>(
+    PricesDocument,
+    options
+  );
+}
+export function usePricesLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+    PricesQuery,
+    PricesQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useLazyQuery<PricesQuery, PricesQueryVariables>(
+    PricesDocument,
+    options
+  );
+}
+export type PricesQueryHookResult = ReturnType<typeof usePricesQuery>;
+export type PricesLazyQueryHookResult = ReturnType<typeof usePricesLazyQuery>;
+export type PricesQueryResult = ApolloReactCommon.QueryResult<
+  PricesQuery,
+  PricesQueryVariables
 >;
 export const DashboardsDocument = gql`
   query Dashboards {

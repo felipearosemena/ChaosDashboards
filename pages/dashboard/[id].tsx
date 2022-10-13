@@ -1,13 +1,12 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useContext, useEffect, useState } from "react";
-import { CryptoPairOption, PriceResponse } from "lib/types";
+import { useContext, useEffect, useMemo } from "react";
 import { CoinDataContext } from "components/CoinDataProvider";
 import { Card } from "components/Layout";
 import { Box, Grid } from "@mui/material";
 import { StatCardWidget } from "components/StatCardWidget";
-import Autocomplete from "components/Autocomplete";
+import Autocomplete, { CryptoPairOption } from "components/Autocomplete";
 import {
   useDashboardByIdQuery,
   useAddCryptoPairMutation,
@@ -15,49 +14,69 @@ import {
   Coin,
   CoinInfo,
   CryptoPair,
+  Dashboard,
+  usePricesLazyQuery,
 } from "lib/graphql/generated";
 import { CoinInfoError } from "components/CoinInfoError";
 
 type CoinDict = { [key: string]: Coin };
 
 const useCoinDict = (coinInfo?: CoinInfo) => {
-  const [coinDict, setCoinDict] = useState<CoinDict>({});
-
-  useEffect(() => {
+  return useMemo(() => {
     if (coinInfo) {
       let newDict: CoinDict = {};
       coinInfo.coins.forEach((coin) => (newDict[coin.symbol] = coin));
-      setCoinDict(newDict);
+      return newDict;
+    } else {
+      return {};
     }
   }, [coinInfo]);
-
-  return coinDict;
 };
 
-const getPrices = async (
+const isOptionDisabled = (
   pairs: CryptoPair[] = [],
-  coinDict: CoinDict = {},
-  onResult: (prices: PriceResponse) => void
+  symbol: string,
+  vsCurrency: string
 ) => {
-  const ids = pairs
-    .map((pair) => {
-      const { symbol } = pair;
-      const coin = coinDict[symbol];
-      return coin?.id;
-    })
-    .filter((id) => id)
-    .join(",");
+  return pairs
+    ? !!pairs.find(
+        (pair) => pair.symbol === symbol && pair.vsCurrency === vsCurrency
+      )
+    : false;
+};
 
-  const vsCurrencies = pairs.map((p) => p.vsCurrency).join(",");
-
-  const response = await fetch(
-    `/api/prices?ids=${ids}&vs_currencies=${vsCurrencies}`
-  );
-
-  if (response.ok) {
-    const prices = await response.json();
-    onResult(prices);
-  }
+const useCryptoPairOptions = (
+  coinInfo?: CoinInfo | null,
+  dashboard?: Dashboard | null
+) => {
+  return useMemo<CryptoPairOption[]>(() => {
+    if (coinInfo && dashboard) {
+      // Nested loop, not ideal for performance if we have a large number of token pairs to support
+      // But should be ok if we are working with a limited number
+      return coinInfo.supportedCurrencies
+        .map((vsCurrency) => {
+          return coinInfo.coins
+            .filter((coin) => coin.symbol && coin.symbol !== vsCurrency)
+            .map(({ symbol = "" }) => {
+              const label = vsCurrency + "/" + symbol;
+              const disabled = isOptionDisabled(
+                dashboard.pairs,
+                symbol,
+                vsCurrency
+              );
+              return {
+                symbol,
+                vsCurrency,
+                label,
+                disabled,
+              };
+            });
+        })
+        .flat();
+    } else {
+      return [];
+    }
+  }, [dashboard, coinInfo]);
 };
 
 const DashboardPage: NextPage = () => {
@@ -76,11 +95,12 @@ const DashboardPage: NextPage = () => {
   const [addCryptoPair] = useAddCryptoPairMutation({
     refetchQueries: [{ query: DashboardByIdDocument, variables: { id } }],
   });
+  const [getPrices, { data: priceData }] = usePricesLazyQuery();
   const coinInfo = coinInfoData?.coinInfo;
   const coinDict = useCoinDict(coinInfo);
   const dashboard = data?.dashboard;
-  const [options, setOptions] = useState<CryptoPairOption[]>([]);
-  const [prices, setPrices] = useState<PriceResponse>({});
+  const options = useCryptoPairOptions(coinInfo, dashboard);
+  // const [prices, setPrices] = useState<PriceResponse>({});
   const hasCoins = !!Object.values(coinDict).length;
 
   const addNewPair = (newSymbol: string, newVsCurrency: string) => {
@@ -97,39 +117,26 @@ const DashboardPage: NextPage = () => {
   };
 
   useEffect(() => {
-    if (coinInfo) {
-      // Nested loop, not ideal for performance if we have a large number of token pairs to support
-      // But should be ok if we are working with a limited number 
-      const options = coinInfo.supportedCurrencies
-        .map((vsCurrency) => {
-          return coinInfo.coins
-            .filter((coin) => coin.symbol && coin.symbol !== vsCurrency)
-            .map(({ symbol = "" }) => {
-              const label = vsCurrency + "/" + symbol;
-              const disabled = dashboard?.pairs
-                ? !!dashboard?.pairs.find(
-                    (pair) =>
-                      pair.symbol === symbol && pair.vsCurrency === vsCurrency
-                  )
-                : false;
-              return {
-                symbol,
-                vsCurrency,
-                label,
-                disabled,
-              };
-            });
-        })
-        .flat();
-      setOptions(options);
-    }
-  }, [dashboard, coinInfo]);
-
-  useEffect(() => {
     if (dashboard?.pairs && hasCoins) {
-      getPrices(dashboard.pairs, coinDict, setPrices);
+      const { pairs } = dashboard;
+      const ids = pairs
+        .map((pair) => {
+          const { symbol } = pair;
+          const coin = coinDict[symbol];
+          return coin?.id;
+        })
+        .filter((id) => id);
+
+      const vsCurrencies = pairs.map((p) => p.vsCurrency);
+
+      getPrices({
+        variables: {
+          ids,
+          vsCurrencies,
+        },
+      });
     }
-  }, [coinDict, dashboard, hasCoins]);
+  }, [getPrices, coinDict, dashboard, hasCoins]);
 
   if (loadingCoinInfo || loadingDashboard) {
     const label = [loadingCoinInfo && "tokens", loadingCoinInfo && "dashboards"]
@@ -171,16 +178,12 @@ const DashboardPage: NextPage = () => {
               const vsCoin = coinDict[pair.vsCurrency];
 
               const coinId = coin?.id || "";
-              const vsCurrencySumbol = vsCoin?.symbol || "";
-              let price;
+              const vsCurrency = vsCoin?.symbol || "";
 
-              if (
-                coinId &&
-                prices[coinId] &&
-                prices[coinId][vsCurrencySumbol]
-              ) {
-                price = 1 / prices[coinId][vsCurrencySumbol];
-              }
+              let price = priceData?.prices.find(
+                (item) =>
+                  item.coinId === coinId && item.vsCurrency === vsCurrency
+              )?.price;
 
               return (
                 <Grid item xs={6} key={`${pair.symbol}-${pair.vsCurrency}`}>

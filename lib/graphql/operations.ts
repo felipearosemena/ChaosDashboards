@@ -23,6 +23,14 @@ export const typeDefs = gql`
     }
   }
 
+  query Prices($ids: [String!]!, $vsCurrencies: [String!]!) {
+    prices(ids: $ids, vsCurrencies: $vsCurrencies) {
+      coinId
+      vsCurrency
+      price
+    }
+  }
+
   query Dashboards {
     dashboards {
       ...DashboardFragment

@@ -1,4 +1,4 @@
-import { Resolvers, Dashboard } from "./generated";
+import { Resolvers, Dashboard, PriceResponse } from "./generated";
 import { DashboardDbObject } from "./generated";
 import { connect } from "../store";
 import { ObjectId } from "mongodb";
@@ -50,16 +50,41 @@ const resolvers: Resolvers = {
         }));
         const coinSymbols = coins.map((coin) => coin.symbol);
 
-        const supportedCurrencies = allSupportedCurrencies.filter(
-          (symbol) => coinSymbols.includes(symbol)
+        const supportedCurrencies = allSupportedCurrencies.filter((symbol) =>
+          coinSymbols.includes(symbol)
         );
 
         return {
           supportedCurrencies,
           coins,
         };
+      } catch (error) {
+        console.log(error);
+        throw new Error("Coingecko API Error");
+      }
+    },
+    prices: async (_: any, { ids, vsCurrencies }) => {
+      try {
+        const response = await coingeckoClient.simplePrice({
+          ids: ids.join(','),
+          vs_currencies: vsCurrencies.join(','),
+        });
+        
+        const prices: PriceResponse[] = []
+        for (const [coinId] of Object.entries(response)) {
+          const responseVsCurrencies = response[coinId]
+          for (const [vsCurrency, price] of Object.entries(responseVsCurrencies)) {
+            prices.push({
+              coinId,
+              vsCurrency,
+              price: 1 / price // Need to invert the value due to how coingecko returns the values
+            })
+          }
+        }
+
+        return prices
       } catch(error) {
-        console.log(error)
+        console.log(error);
         throw new Error("Coingecko API Error");
       }
     },
@@ -84,9 +109,9 @@ const resolvers: Resolvers = {
       });
 
       if (result.deletedCount) {
-        return true
+        return true;
       } else {
-        throw new Error(`Failed to delete dashboard id: ${id}`)
+        throw new Error(`Failed to delete dashboard id: ${id}`);
       }
     },
     addCryptoPair: async (_: any, { dashboardId, symbol, vsCurrency }) => {
