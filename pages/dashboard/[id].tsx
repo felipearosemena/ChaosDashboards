@@ -63,7 +63,11 @@ const getPrices = async (
 const DashboardPage: NextPage = () => {
   const router = useRouter();
   const id = typeof router.query.id === "string" ? router.query.id : "";
-  const { data: coinInfoData, loading: loadingCoinInfo, error: coinInfoError } = useContext(CoinDataContext);
+  const {
+    data: coinInfoData,
+    loading: loadingCoinInfo,
+    error: coinInfoError,
+  } = useContext(CoinDataContext);
   const { data, loading: loadingDashboard } = useDashboardByIdQuery({
     variables: { id },
     skip: !id.length,
@@ -71,10 +75,9 @@ const DashboardPage: NextPage = () => {
   const [addCryptoPair] = useAddCryptoPairMutation({
     refetchQueries: [{ query: DashboardByIdDocument, variables: { id } }],
   });
-  const coinInfo = coinInfoData?.coinInfo
+  const coinInfo = coinInfoData?.coinInfo;
   const coinDict = useCoinDict(coinInfo);
   const dashboard = data?.dashboard;
-  const pairs = dashboard ? [...dashboard.pairs] : [];
   const [options, setOptions] = useState<CryptoPairOption[]>([]);
   const [prices, setPrices] = useState<PriceResponse>({});
   const hasCoins = !!Object.values(coinDict).length;
@@ -94,14 +97,16 @@ const DashboardPage: NextPage = () => {
 
   useEffect(() => {
     if (coinInfo) {
+      // Nested loop, not ideal for performance if we have a large number of token pairs to support
+      // But should be ok if we are working with a limited number 
       const options = coinInfo.supportedCurrencies
         .map((vsCurrency) => {
           return coinInfo.coins
             .filter((coin) => coin.symbol && coin.symbol !== vsCurrency)
             .map(({ symbol = "" }) => {
-              const value = vsCurrency + "/" + symbol;
-              const disabled = dashboard
-                ? !!dashboard.pairs.find(
+              const label = vsCurrency + "/" + symbol;
+              const disabled = dashboard?.pairs
+                ? !!dashboard?.pairs.find(
                     (pair) =>
                       pair.symbol === symbol && pair.vsCurrency === vsCurrency
                   )
@@ -109,7 +114,7 @@ const DashboardPage: NextPage = () => {
               return {
                 symbol,
                 vsCurrency,
-                value,
+                label,
                 disabled,
               };
             });
@@ -120,27 +125,24 @@ const DashboardPage: NextPage = () => {
   }, [dashboard, coinInfo]);
 
   useEffect(() => {
-    if (dashboard?.pairs && Object.values(coinDict).length) {
+    if (dashboard?.pairs && hasCoins) {
       getPrices(dashboard.pairs, coinDict, setPrices);
     }
-  }, [coinDict, dashboard]);
+  }, [coinDict, dashboard, hasCoins]);
 
   if (!dashboard) {
     return null;
   }
 
   if (loadingCoinInfo || loadingDashboard) {
-    const label = [
-      loadingCoinInfo && "tokens",
-      loadingCoinInfo && "dashboards",
-    ]
+    const label = [loadingCoinInfo && "tokens", loadingCoinInfo && "dashboards"]
       .filter((v) => v)
       .join(", ");
     return <Card>Loading: {label}</Card>;
   }
 
   if (coinInfoError) {
-    return <CoinInfoError message={coinInfoError.message} />
+    return <CoinInfoError message={coinInfoError.message} />;
   }
 
   return (
@@ -166,8 +168,8 @@ const DashboardPage: NextPage = () => {
         </Box>
         <Grid container spacing={3}>
           {hasCoins &&
-            !!pairs.length &&
-            pairs.sort().map((pair) => {
+            !!dashboard?.pairs.length &&
+            dashboard?.pairs.map((pair) => {
               const coin = coinDict[pair.symbol];
               const vsCoin = coinDict[pair.vsCurrency];
 

@@ -141,11 +141,11 @@ export default function VirtualizedAutocomplete({
       getOptionDisabled={option => option.disabled}
       onChange={(e, value) => value && onChange(value)}
       options={options}
-      getOptionLabel={(option) => option.value}
+      getOptionLabel={(option) => option.label}
       renderInput={(params) => (
         <TextField {...params} label="Add crypto pair" />
       )}
-      renderOption={(props, option) => [props, option.value] as React.ReactNode}
+      renderOption={(props, option) => [props, option.label] as React.ReactNode}
       renderGroup={(params) => params as unknown as React.ReactNode}
     />
   );
