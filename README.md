@@ -46,4 +46,3 @@ Credentials are saved to `.env.local.sample` for ease of share with the tester.
 - [ ] Better search UX: search by coin name to filter out symbol options
 - [ ] Responsive styles
 - [ ] Graceful widget + image loading
-- [ ] 
