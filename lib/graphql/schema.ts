@@ -26,7 +26,6 @@ export const typeDefs = gql`
     symbol: String!
     name: String!
     image: String!
-    price: Float!
   }
 
   type CryptoPair {

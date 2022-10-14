@@ -30,7 +30,6 @@ export type Coin = {
   id: Scalars["String"];
   image: Scalars["String"];
   name: Scalars["String"];
-  price: Scalars["Float"];
   symbol: Scalars["String"];
 };
 
@@ -210,13 +209,13 @@ export type DirectiveResolverFn<
 export type ResolversTypes = {
   Coin: ResolverTypeWrapper<Coin>;
   String: ResolverTypeWrapper<Scalars["String"]>;
-  Float: ResolverTypeWrapper<Scalars["Float"]>;
   CoinInfo: ResolverTypeWrapper<CoinInfo>;
   CryptoPair: ResolverTypeWrapper<CryptoPair>;
   Dashboard: ResolverTypeWrapper<Dashboard>;
   Mutation: ResolverTypeWrapper<{}>;
   ID: ResolverTypeWrapper<Scalars["ID"]>;
   PricePair: ResolverTypeWrapper<PricePair>;
+  Float: ResolverTypeWrapper<Scalars["Float"]>;
   Query: ResolverTypeWrapper<{}>;
   SuccessResponse: ResolverTypeWrapper<SuccessResponse>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
@@ -227,13 +226,13 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   Coin: Coin;
   String: Scalars["String"];
-  Float: Scalars["Float"];
   CoinInfo: CoinInfo;
   CryptoPair: CryptoPair;
   Dashboard: Dashboard;
   Mutation: {};
   ID: Scalars["ID"];
   PricePair: PricePair;
+  Float: Scalars["Float"];
   Query: {};
   SuccessResponse: SuccessResponse;
   Boolean: Scalars["Boolean"];
@@ -334,7 +333,6 @@ export type CoinResolvers<
   id?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   image?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  price?: Resolver<ResolversTypes["Float"], ParentType, ContextType>;
   symbol?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -477,13 +475,7 @@ export type CoinInfoQueryVariables = Exact<{ [key: string]: never }>;
 export type CoinInfoQuery = {
   coinInfo: {
     supportedCurrencies: Array<string>;
-    coins: Array<{
-      id: string;
-      symbol: string;
-      name: string;
-      image: string;
-      price: number;
-    }>;
+    coins: Array<{ id: string; symbol: string; name: string; image: string }>;
   };
 };
 
@@ -570,7 +562,6 @@ export const CoinInfoDocument = gql`
         symbol
         name
         image
-        price
       }
       supportedCurrencies
     }
