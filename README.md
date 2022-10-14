@@ -41,7 +41,6 @@ Credentials are saved to `.env.local.sample` for ease of share with the tester.
 - [x] Server side storage
 - [x] Initial coin data fetching error handling
 - [x] Disable selected pairs in dashboard
-- [ ] Better search UX: allow user to search by 
 - [ ] Tests
 - [ ] Responsive styles
 - [ ] Graceful widget + image loading
