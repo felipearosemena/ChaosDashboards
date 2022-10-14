@@ -23,8 +23,11 @@ const DashboardPage: NextPage = () => {
     loading: loadingCoinInfo,
     error: coinInfoError,
   } = useContext(CoinDataContext);
-  const { data, loading: loadingDashboard } = useDashboardByIdQuery({
-    fetchPolicy: "cache-first",
+  const {
+    data,
+    loading: loadingDashboard,
+    error: dashboardError,
+  } = useDashboardByIdQuery({
     variables: { id },
     skip: !id.length,
   });
@@ -49,7 +52,10 @@ const DashboardPage: NextPage = () => {
   };
 
   if (loadingCoinInfo || loadingDashboard) {
-    const label = [loadingCoinInfo && "tokens", loadingCoinInfo && "dashboards"]
+    const label = [
+      loadingCoinInfo && "tokens",
+      loadingDashboard && "dashboards",
+    ]
       .filter((v) => v)
       .join(", ");
     return <Card>Loading: {label}</Card>;
@@ -57,6 +63,15 @@ const DashboardPage: NextPage = () => {
 
   if (coinInfoError) {
     return <CoinInfoError message={coinInfoError.message} />;
+  }
+
+  if (dashboardError) {
+    return (
+      <Card>
+        <h1>Failed to load dashboard and prices</h1>
+        <p>{dashboardError.message} - {dashboardError.extraInfo}</p>
+      </Card>
+    );
   }
 
   return (
@@ -81,7 +96,8 @@ const DashboardPage: NextPage = () => {
           </Card>
         </Box>
         <Grid container spacing={3}>
-          {dashboard?.pairs.map((pair) => {
+          {coinInfo?.coins &&
+            dashboard?.pairs.map((pair) => {
               const coin = coinInfo?.coins.find(
                 (coin) => coin.id === pair.coinId
               );
