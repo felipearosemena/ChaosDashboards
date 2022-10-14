@@ -39,7 +39,7 @@ export const useCryptoPairOptions = (
                 label,
                 disabled,
               };
-            });
+            })
         })
         .flat();
     } else {

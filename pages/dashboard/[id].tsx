@@ -114,7 +114,6 @@ const DashboardPage: NextPage = () => {
 
             <Box display={"inline-flex"} alignItems={"center"}>
               <Autocomplete
-                key={"vscurrency-" + dashboard?.pairs.length}
                 disabled={addingPair || loadingDashboard}
                 options={options}
                 onChange={(option) =>
