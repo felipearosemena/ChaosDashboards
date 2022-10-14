@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useContext } from "react";
 import { CoinDataContext } from "components/CoinDataProvider";
 import { Card } from "components/Layout";
-import { Box, Grid } from "@mui/material";
+import { Box, CircularProgress, Grid } from "@mui/material";
 import { StatCardWidget } from "components/StatCardWidget";
 import Autocomplete from "components/Autocomplete";
 import {
@@ -27,12 +27,16 @@ const DashboardPage: NextPage = () => {
     data,
     loading: loadingDashboard,
     error: dashboardError,
+    refetch,
   } = useDashboardByIdQuery({
     variables: { id },
     skip: !id.length,
+    notifyOnNetworkStatusChange: true,
   });
-  const [addCryptoPair] = useAddCryptoPairMutation({
-    refetchQueries: [{ query: DashboardByIdDocument, variables: { id } }],
+  const [addCryptoPair, { loading: addingPair }] = useAddCryptoPairMutation({
+    onCompleted() {
+      refetch();
+    },
   });
   const coinInfo = coinInfoData?.coinInfo;
   const dashboard = data?.dashboard;
@@ -51,14 +55,12 @@ const DashboardPage: NextPage = () => {
     }
   };
 
-  if (loadingCoinInfo || loadingDashboard) {
-    const label = [
-      loadingCoinInfo && "tokens",
-      loadingDashboard && "dashboards",
-    ]
-      .filter((v) => v)
-      .join(", ");
-    return <Card>Loading: {label}</Card>;
+  if (loadingCoinInfo || !dashboard) {
+    return (
+      <Card>
+        <CircularProgress />
+      </Card>
+    );
   }
 
   if (coinInfoError) {
@@ -69,7 +71,9 @@ const DashboardPage: NextPage = () => {
     return (
       <Card>
         <h1>Failed to load dashboard and prices</h1>
-        <p>{dashboardError.message} - {dashboardError.extraInfo}</p>
+        <p>
+          {dashboardError.message} - {dashboardError.extraInfo}
+        </p>
       </Card>
     );
   }
@@ -86,13 +90,19 @@ const DashboardPage: NextPage = () => {
           <Card>
             <h1>{dashboard?.title}</h1>
 
-            <Autocomplete
-              key={"vscurrency-" + dashboard?.pairs.length}
-              options={options}
-              onChange={(option) =>
-                addNewPair(option.coinId, option.vsCurrency)
-              }
-            />
+            <Box display={"inline-flex"} alignItems={"center"}>
+              <Autocomplete
+                key={"vscurrency-" + dashboard?.pairs.length}
+                disabled={addingPair || loadingDashboard}
+                options={options}
+                onChange={(option) =>
+                  addNewPair(option.coinId, option.vsCurrency)
+                }
+              />
+              {(addingPair || loadingDashboard) && (
+                <CircularProgress size={24} style={{ marginLeft: 20 }} />
+              )}
+            </Box>
           </Card>
         </Box>
         <Grid container spacing={3}>

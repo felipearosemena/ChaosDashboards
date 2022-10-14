@@ -126,18 +126,20 @@ const StyledPopper = styled(Popper)({
 type VirtualizedAutocompleteProps = {
   options: CryptoPairOption[];
   onChange: (option: CryptoPairOption) => void;
+  disabled: boolean
 };
 
 export default function VirtualizedAutocomplete({
   options,
   onChange,
+  disabled
 }: VirtualizedAutocompleteProps) {
   return (
     <Autocomplete
       id="virtualize-demo"
       sx={{ width: 300 }}
       disableListWrap
-      
+      disabled={disabled}
       PopperComponent={StyledPopper}
       ListboxComponent={ListboxComponent}
       getOptionDisabled={option => option.disabled}

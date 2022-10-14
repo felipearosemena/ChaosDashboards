@@ -17,11 +17,16 @@ const fromDbObject = (dbObject: DashboardDbObject): Dashboard => ({
   pairs: dbObject.pairs,
 });
 
+const dedupe = (strings: string[] = []) =>
+  strings.filter((string, index) => {
+    return strings.indexOf(string) === index;
+  });
+
 const fetchPrices = async (ids: string[], vsCurrencies: string[]) => {
   try {
     const response = await coingeckoClient.simplePrice({
-      ids: ids.join(","),
-      vs_currencies: vsCurrencies.join(","),
+      ids: dedupe(ids).join(","),
+      vs_currencies: dedupe(vsCurrencies).join(","),
     });
 
     const prices: CryptoPair[] = [];
@@ -117,6 +122,7 @@ const resolvers: Resolvers = {
         pairs: [],
       };
       const result = await collection.insertOne(data);
+
       return fromDbObject({
         ...data,
         _id: result.insertedId,
@@ -129,7 +135,7 @@ const resolvers: Resolvers = {
       });
 
       if (result.deletedCount) {
-        return true;
+        return { success: true };
       } else {
         throw new Error(`Failed to delete dashboard id: ${id}`);
       }
@@ -174,7 +180,7 @@ const resolvers: Resolvers = {
         throw new Error("Failed to add pair");
       }
 
-      return fromDbObject({ ...result, pairs });
+      return { success: true };
     },
   },
 };

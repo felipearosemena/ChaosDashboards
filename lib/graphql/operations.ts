@@ -1,16 +1,6 @@
 import { gql } from "@apollo/client";
 
 export const typeDefs = gql`
-  fragment DashboardFragment on Dashboard {
-    id
-    title
-    pairs {
-      coinId
-      vsCurrency
-      price
-    }
-  }
-
   query CoinInfo {
     coinInfo {
       coins {
@@ -34,24 +24,36 @@ export const typeDefs = gql`
 
   query Dashboards {
     dashboards {
-      ...DashboardFragment
+      id
+      title
+      pairs {
+        coinId
+      }
     }
   }
 
   query DashboardById($id: ID!) {
     dashboard(id: $id) {
-      ...DashboardFragment
+      id
+      title
+      pairs {
+        coinId
+        vsCurrency
+        price
+      }
     }
   }
 
   mutation CreateDashboard($title: String!) {
     createDashboard(title: $title) {
-      ...DashboardFragment
+      id
     }
   }
 
   mutation DeleteDashboard($id: ID!) {
-    deleteDashboard(id: $id)
+    deleteDashboard(id: $id) {
+      success
+    }
   }
 
   mutation AddCryptoPair(
@@ -64,7 +66,7 @@ export const typeDefs = gql`
       coinId: $coinId
       vsCurrency: $vsCurrency
     ) {
-      ...DashboardFragment
+      success
     }
   }
 `;

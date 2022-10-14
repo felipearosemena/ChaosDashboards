@@ -52,9 +52,9 @@ export type Dashboard = {
 };
 
 export type Mutation = {
-  addCryptoPair: Dashboard;
+  addCryptoPair?: Maybe<SuccessResponse>;
   createDashboard: Dashboard;
-  deleteDashboard?: Maybe<Scalars["Boolean"]>;
+  deleteDashboard?: Maybe<SuccessResponse>;
 };
 
 export type MutationAddCryptoPairArgs = {
@@ -85,6 +85,10 @@ export type QueryDashboardArgs = {
 export type QueryPricesArgs = {
   ids: Array<Scalars["String"]>;
   vsCurrencies: Array<Scalars["String"]>;
+};
+
+export type SuccessResponse = {
+  success?: Maybe<Scalars["Boolean"]>;
 };
 
 export type AdditionalEntityFields = {
@@ -207,8 +211,9 @@ export type ResolversTypes = {
   Dashboard: ResolverTypeWrapper<Dashboard>;
   Mutation: ResolverTypeWrapper<{}>;
   ID: ResolverTypeWrapper<Scalars["ID"]>;
-  Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   Query: ResolverTypeWrapper<{}>;
+  SuccessResponse: ResolverTypeWrapper<SuccessResponse>;
+  Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   AdditionalEntityFields: AdditionalEntityFields;
 };
 
@@ -222,8 +227,9 @@ export type ResolversParentTypes = {
   Dashboard: Dashboard;
   Mutation: {};
   ID: Scalars["ID"];
-  Boolean: Scalars["Boolean"];
   Query: {};
+  SuccessResponse: SuccessResponse;
+  Boolean: Scalars["Boolean"];
   AdditionalEntityFields: AdditionalEntityFields;
 };
 
@@ -368,7 +374,7 @@ export type MutationResolvers<
   ParentType extends ResolversParentTypes["Mutation"] = ResolversParentTypes["Mutation"]
 > = {
   addCryptoPair?: Resolver<
-    ResolversTypes["Dashboard"],
+    Maybe<ResolversTypes["SuccessResponse"]>,
     ParentType,
     ContextType,
     RequireFields<
@@ -383,7 +389,7 @@ export type MutationResolvers<
     RequireFields<MutationCreateDashboardArgs, "title">
   >;
   deleteDashboard?: Resolver<
-    Maybe<ResolversTypes["Boolean"]>,
+    Maybe<ResolversTypes["SuccessResponse"]>,
     ParentType,
     ContextType,
     RequireFields<MutationDeleteDashboardArgs, "id">
@@ -414,6 +420,14 @@ export type QueryResolvers<
   >;
 };
 
+export type SuccessResponseResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["SuccessResponse"] = ResolversParentTypes["SuccessResponse"]
+> = {
+  success?: Resolver<Maybe<ResolversTypes["Boolean"]>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type Resolvers<ContextType = any> = {
   Coin?: CoinResolvers<ContextType>;
   CoinInfo?: CoinInfoResolvers<ContextType>;
@@ -421,6 +435,7 @@ export type Resolvers<ContextType = any> = {
   Dashboard?: DashboardResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  SuccessResponse?: SuccessResponseResolvers<ContextType>;
 };
 
 export type DirectiveResolvers<ContextType = any> = {
@@ -432,12 +447,6 @@ export type DirectiveResolvers<ContextType = any> = {
   link?: LinkDirectiveResolver<any, any, ContextType>;
   embedded?: EmbeddedDirectiveResolver<any, any, ContextType>;
   map?: MapDirectiveResolver<any, any, ContextType>;
-};
-
-export type DashboardFragmentFragment = {
-  id: string;
-  title: string;
-  pairs: Array<{ coinId: string; vsCurrency: string; price?: number | null }>;
 };
 
 export type CoinInfoQueryVariables = Exact<{ [key: string]: never }>;
@@ -470,7 +479,7 @@ export type DashboardsQuery = {
   dashboards: Array<{
     id: string;
     title: string;
-    pairs: Array<{ coinId: string; vsCurrency: string; price?: number | null }>;
+    pairs: Array<{ coinId: string }>;
   }>;
 };
 
@@ -490,19 +499,15 @@ export type CreateDashboardMutationVariables = Exact<{
   title: Scalars["String"];
 }>;
 
-export type CreateDashboardMutation = {
-  createDashboard: {
-    id: string;
-    title: string;
-    pairs: Array<{ coinId: string; vsCurrency: string; price?: number | null }>;
-  };
-};
+export type CreateDashboardMutation = { createDashboard: { id: string } };
 
 export type DeleteDashboardMutationVariables = Exact<{
   id: Scalars["ID"];
 }>;
 
-export type DeleteDashboardMutation = { deleteDashboard?: boolean | null };
+export type DeleteDashboardMutation = {
+  deleteDashboard?: { success?: boolean | null } | null;
+};
 
 export type AddCryptoPairMutationVariables = Exact<{
   dashboardId: Scalars["ID"];
@@ -511,24 +516,9 @@ export type AddCryptoPairMutationVariables = Exact<{
 }>;
 
 export type AddCryptoPairMutation = {
-  addCryptoPair: {
-    id: string;
-    title: string;
-    pairs: Array<{ coinId: string; vsCurrency: string; price?: number | null }>;
-  };
+  addCryptoPair?: { success?: boolean | null } | null;
 };
 
-export const DashboardFragmentFragmentDoc = gql`
-  fragment DashboardFragment on Dashboard {
-    id
-    title
-    pairs {
-      coinId
-      vsCurrency
-      price
-    }
-  }
-`;
 export const CoinInfoDocument = gql`
   query CoinInfo {
     coinInfo {
@@ -651,10 +641,13 @@ export type PricesQueryResult = ApolloReactCommon.QueryResult<
 export const DashboardsDocument = gql`
   query Dashboards {
     dashboards {
-      ...DashboardFragment
+      id
+      title
+      pairs {
+        coinId
+      }
     }
   }
-  ${DashboardFragmentFragmentDoc}
 `;
 
 /**
@@ -707,10 +700,15 @@ export type DashboardsQueryResult = ApolloReactCommon.QueryResult<
 export const DashboardByIdDocument = gql`
   query DashboardById($id: ID!) {
     dashboard(id: $id) {
-      ...DashboardFragment
+      id
+      title
+      pairs {
+        coinId
+        vsCurrency
+        price
+      }
     }
   }
-  ${DashboardFragmentFragmentDoc}
 `;
 
 /**
@@ -766,10 +764,9 @@ export type DashboardByIdQueryResult = ApolloReactCommon.QueryResult<
 export const CreateDashboardDocument = gql`
   mutation CreateDashboard($title: String!) {
     createDashboard(title: $title) {
-      ...DashboardFragment
+      id
     }
   }
-  ${DashboardFragmentFragmentDoc}
 `;
 export type CreateDashboardMutationFn = ApolloReactCommon.MutationFunction<
   CreateDashboardMutation,
@@ -817,7 +814,9 @@ export type CreateDashboardMutationOptions =
   >;
 export const DeleteDashboardDocument = gql`
   mutation DeleteDashboard($id: ID!) {
-    deleteDashboard(id: $id)
+    deleteDashboard(id: $id) {
+      success
+    }
   }
 `;
 export type DeleteDashboardMutationFn = ApolloReactCommon.MutationFunction<
@@ -875,10 +874,9 @@ export const AddCryptoPairDocument = gql`
       coinId: $coinId
       vsCurrency: $vsCurrency
     ) {
-      ...DashboardFragment
+      success
     }
   }
-  ${DashboardFragmentFragmentDoc}
 `;
 export type AddCryptoPairMutationFn = ApolloReactCommon.MutationFunction<
   AddCryptoPairMutation,

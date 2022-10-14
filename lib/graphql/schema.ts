@@ -10,9 +10,11 @@ export const typeDefs = gql`
 
   type Mutation {
     createDashboard(title: String!): Dashboard!
-    deleteDashboard(id: ID!): Boolean
-    addCryptoPair(dashboardId: ID!, coinId: String!, vsCurrency: String!): Dashboard!
+    deleteDashboard(id: ID!): SuccessResponse
+    addCryptoPair(dashboardId: ID!, coinId: String!, vsCurrency: String!): SuccessResponse
   }
+
+  type SuccessResponse { success: Boolean }
 
   type CoinInfo {
     supportedCurrencies: [String!]!

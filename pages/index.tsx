@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import {
   Button,
   Chip,
+  CircularProgress,
   Divider,
   IconButton,
   List,
@@ -34,13 +35,11 @@ const Dashboards: NextPage = () => {
   });
 
   if (loadingCoinInfo || loadingDashboards) {
-    const label = [
-      loadingCoinInfo && "tokens",
-      loadingDashboards && "dashboards",
-    ]
-      .filter((v) => v)
-      .join(", ");
-    return <Card>Loading: {label}</Card>;
+    return (
+      <Card>
+        <CircularProgress />
+      </Card>
+    );
   }
 
   if (coinInfoError) {
@@ -71,7 +70,6 @@ const Dashboards: NextPage = () => {
                       disableRipple
                       key={dashboard.id}
                       onClick={() => router.push(`/dashboard/${dashboard.id}`)}
-                      disabled={deleting}
                     >
                       <ListItemText primary={dashboard.title} />
 
