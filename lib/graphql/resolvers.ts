@@ -1,8 +1,9 @@
-import { Resolvers, Dashboard, CryptoPair } from "./generated";
+import { Resolvers, Dashboard, PricePair } from "./generated";
 import { DashboardDbObject } from "./generated";
 import { connect } from "../store";
 import { ObjectId } from "mongodb";
 import { client as coingeckoClient } from "lib/coingecko";
+import { dedupe } from "lib/utils";
 
 const dbPromise = connect();
 
@@ -17,37 +18,6 @@ const fromDbObject = (dbObject: DashboardDbObject): Dashboard => ({
   pairs: dbObject.pairs,
 });
 
-const dedupe = (strings: string[] = []) =>
-  strings.filter((string, index) => {
-    return strings.indexOf(string) === index;
-  });
-
-const fetchPrices = async (ids: string[], vsCurrencies: string[]) => {
-  try {
-    const response = await coingeckoClient.simplePrice({
-      ids: dedupe(ids).join(","),
-      vs_currencies: dedupe(vsCurrencies).join(","),
-    });
-
-    const prices: CryptoPair[] = [];
-    for (const [coinId] of Object.entries(response)) {
-      const responseVsCurrencies = response[coinId];
-      for (const [vsCurrency, price] of Object.entries(responseVsCurrencies)) {
-        prices.push({
-          coinId,
-          vsCurrency,
-          price: 1 / price, // Need to invert the value due to how coingecko returns the values
-        });
-      }
-    }
-
-    return prices;
-  } catch (error) {
-    console.log(error);
-    throw new Error("Coingecko API Error");
-  }
-};
-
 const resolvers: Resolvers = {
   Query: {
     dashboards: async () => {
@@ -61,20 +31,6 @@ const resolvers: Resolvers = {
       });
 
       const result = dbObject ? fromDbObject(dbObject) : null;
-
-      if (result?.pairs.length) {
-        const { pairs } = result;
-        const ids = pairs.map((p) => p.coinId);
-        const vsCurrencies = pairs.map((p) => p.vsCurrency);
-        const prices = await fetchPrices(ids, vsCurrencies);
-        pairs.forEach((pair) => {
-          pair.price = prices.find(
-            (price) =>
-              price.coinId === pair.coinId &&
-              price.vsCurrency === pair.vsCurrency
-          )?.price;
-        });
-      }
 
       return result;
     },
@@ -111,8 +67,31 @@ const resolvers: Resolvers = {
         throw new Error("Coingecko API Error");
       }
     },
-    prices: async (_: any, { ids, vsCurrencies }) =>
-      fetchPrices(ids, vsCurrencies),
+    prices: async (_: any, { ids, vsCurrencies }) => {
+      try {
+        const response = await coingeckoClient.simplePrice({
+          ids: dedupe(ids).join(","),
+          vs_currencies: dedupe(vsCurrencies).join(","),
+        });
+    
+        const prices: PricePair[] = [];
+        for (const [coinId] of Object.entries(response)) {
+          const responseVsCurrencies = response[coinId];
+          for (const [vsCurrency, price] of Object.entries(responseVsCurrencies)) {
+            prices.push({
+              coinId,
+              vsCurrency,
+              price: 1 / price, // Need to invert the value due to how coingecko returns the values
+            });
+          }
+        }
+    
+        return prices;
+      } catch (error) {
+        console.log(error);
+        throw new Error("Coingecko API Error");
+      }
+    }
   },
   Mutation: {
     createDashboard: async (_: any, { title }) => {
@@ -180,7 +159,7 @@ const resolvers: Resolvers = {
         throw new Error("Failed to add pair");
       }
 
-      return { success: true };
+      return fromDbObject({ ...result, pairs });;
     },
   },
 };

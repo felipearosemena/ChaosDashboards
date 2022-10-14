@@ -47,3 +47,8 @@ export const useCryptoPairOptions = (
     }
   }, [dashboard, coinInfo]);
 };
+
+export const dedupe = (strings: string[] = []) =>
+  strings.filter((string, index) => {
+    return strings.indexOf(string) === index;
+  });

@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { CoinDataContext } from "components/CoinDataProvider";
 import { Card } from "components/Layout";
 import { Box, CircularProgress, Grid } from "@mui/material";
@@ -10,10 +10,29 @@ import Autocomplete from "components/Autocomplete";
 import {
   useDashboardByIdQuery,
   useAddCryptoPairMutation,
-  DashboardByIdDocument,
+  usePricesLazyQuery,
+  CryptoPair,
+  PricePair,
 } from "lib/graphql/generated";
 import { CoinInfoError } from "components/CoinInfoError";
-import { useCryptoPairOptions } from "lib/utils";
+import { dedupe, useCryptoPairOptions } from "lib/utils";
+
+const useLazyPrices = () => {
+  const [fetchPrices, { loading }] = usePricesLazyQuery();
+  const [pricePairs, setPricePairs] = useState<PricePair[]>([]);
+
+  const getPricesFor = async (pairs: CryptoPair[] = []) => {
+    const ids = dedupe(pairs.map((p) => p.coinId));
+    const vsCurrencies = dedupe(pairs.map((p) => p.vsCurrency));
+    const { data } = await fetchPrices({ variables: { ids, vsCurrencies } });
+
+    if (data) {
+      setPricePairs(data.prices);
+    }
+  };
+
+  return { pricePairs, getPricesFor, loading };
+};
 
 const DashboardPage: NextPage = () => {
   const router = useRouter();
@@ -23,6 +42,7 @@ const DashboardPage: NextPage = () => {
     loading: loadingCoinInfo,
     error: coinInfoError,
   } = useContext(CoinDataContext);
+  const { pricePairs, getPricesFor } = useLazyPrices();
   const {
     data,
     loading: loadingDashboard,
@@ -31,7 +51,9 @@ const DashboardPage: NextPage = () => {
   } = useDashboardByIdQuery({
     variables: { id },
     skip: !id.length,
-    notifyOnNetworkStatusChange: true,
+    onCompleted({ dashboard }) {
+      getPricesFor(dashboard?.pairs);
+    },
   });
   const [addCryptoPair, { loading: addingPair }] = useAddCryptoPairMutation({
     onCompleted() {
@@ -51,7 +73,7 @@ const DashboardPage: NextPage = () => {
           coinId: newCoinId,
           vsCurrency: newVsCurrency,
         },
-      });
+      })
     }
   };
 
@@ -70,7 +92,7 @@ const DashboardPage: NextPage = () => {
   if (dashboardError) {
     return (
       <Card>
-        <h1>Failed to load dashboard and prices</h1>
+        <h1>Failed to load dashboard</h1>
         <p>
           {dashboardError.message} - {dashboardError.extraInfo}
         </p>
@@ -115,13 +137,19 @@ const DashboardPage: NextPage = () => {
                 (coin) => coin.symbol === pair.vsCurrency
               );
 
+              const pricePair = pricePairs.find(
+                (price) =>
+                  price.coinId === pair.coinId &&
+                  price.vsCurrency === pair.vsCurrency
+              );
+
               return (
                 <Grid item xs={6} key={`${pair.coinId}-${pair.vsCurrency}`}>
                   {coin && vsCoin && (
                     <StatCardWidget
                       coin={coin}
                       vsCoin={vsCoin}
-                      price={pair.price}
+                      price={pricePair?.price}
                     />
                   )}
                 </Grid>

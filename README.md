@@ -2,7 +2,7 @@
 
 Public url at: https://chaos-dashboards.vercel.app/
 
-> This coingecko api is rate limited to 10 requests each 60 seconds. I also noticed it can timeout on the first request. 
+> The coingecko api is rate limited to 10 requests each 60 seconds.
 > If you get an error loading tokens, reload the browser or try again in a few seconds
 ## Architecture
 
@@ -46,3 +46,4 @@ Credentials are saved to `.env.local.sample` for ease of share with the tester.
 - [ ] Better search UX: search by coin name to filter out symbol options
 - [ ] Responsive styles
 - [ ] Graceful widget + image loading
+- [ ] 
