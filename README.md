@@ -32,3 +32,16 @@ Any Query or Mutation that interacts with a `Dashboard` or it's `CryptoPair`s re
 Credentials are saved to `.env.local.sample` for ease of share with the tester.
 
 `coinInfo` & `prices` Queries hit the coingecko api directly. They cannot be abused or we'll hit the rate limit for the free tier.
+
+
+## Improvements
+
+- [x] Graphql + Codegen
+- [x] Autocomplete For Pairs
+- [x] Server side storage
+- [x] Initial coin data fetching error handling
+- [x] Disable selected pairs in dashboard
+- [ ] Better search UX: allow user to search by 
+- [ ] Tests
+- [ ] Responsive styles
+- [ ] Graceful widget + image loading
