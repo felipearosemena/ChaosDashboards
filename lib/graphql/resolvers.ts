@@ -1,4 +1,4 @@
-import { Resolvers, Dashboard, PriceResponse } from "./generated";
+import { Resolvers, Dashboard, CryptoPair } from "./generated";
 import { DashboardDbObject } from "./generated";
 import { connect } from "../store";
 import { ObjectId } from "mongodb";
@@ -24,7 +24,7 @@ const fetchPrices = async (ids: string[], vsCurrencies: string[]) => {
       vs_currencies: vsCurrencies.join(","),
     });
 
-    const prices: PriceResponse[] = [];
+    const prices: CryptoPair[] = [];
     for (const [coinId] of Object.entries(response)) {
       const responseVsCurrencies = response[coinId];
       for (const [vsCurrency, price] of Object.entries(responseVsCurrencies)) {

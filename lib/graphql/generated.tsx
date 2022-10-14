@@ -71,17 +71,11 @@ export type MutationDeleteDashboardArgs = {
   id: Scalars["ID"];
 };
 
-export type PriceResponse = {
-  coinId: Scalars["String"];
-  price: Scalars["Float"];
-  vsCurrency: Scalars["String"];
-};
-
 export type Query = {
   coinInfo: CoinInfo;
   dashboard?: Maybe<Dashboard>;
   dashboards: Array<Dashboard>;
-  prices: Array<PriceResponse>;
+  prices: Array<CryptoPair>;
 };
 
 export type QueryDashboardArgs = {
@@ -214,7 +208,6 @@ export type ResolversTypes = {
   Mutation: ResolverTypeWrapper<{}>;
   ID: ResolverTypeWrapper<Scalars["ID"]>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
-  PriceResponse: ResolverTypeWrapper<PriceResponse>;
   Query: ResolverTypeWrapper<{}>;
   AdditionalEntityFields: AdditionalEntityFields;
 };
@@ -230,7 +223,6 @@ export type ResolversParentTypes = {
   Mutation: {};
   ID: Scalars["ID"];
   Boolean: Scalars["Boolean"];
-  PriceResponse: PriceResponse;
   Query: {};
   AdditionalEntityFields: AdditionalEntityFields;
 };
@@ -398,16 +390,6 @@ export type MutationResolvers<
   >;
 };
 
-export type PriceResponseResolvers<
-  ContextType = any,
-  ParentType extends ResolversParentTypes["PriceResponse"] = ResolversParentTypes["PriceResponse"]
-> = {
-  coinId?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  price?: Resolver<ResolversTypes["Float"], ParentType, ContextType>;
-  vsCurrency?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type QueryResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
@@ -425,7 +407,7 @@ export type QueryResolvers<
     ContextType
   >;
   prices?: Resolver<
-    Array<ResolversTypes["PriceResponse"]>,
+    Array<ResolversTypes["CryptoPair"]>,
     ParentType,
     ContextType,
     RequireFields<QueryPricesArgs, "ids" | "vsCurrencies">
@@ -438,7 +420,6 @@ export type Resolvers<ContextType = any> = {
   CryptoPair?: CryptoPairResolvers<ContextType>;
   Dashboard?: DashboardResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
-  PriceResponse?: PriceResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
 };
 
@@ -480,7 +461,7 @@ export type PricesQueryVariables = Exact<{
 }>;
 
 export type PricesQuery = {
-  prices: Array<{ coinId: string; vsCurrency: string; price: number }>;
+  prices: Array<{ coinId: string; vsCurrency: string; price?: number | null }>;
 };
 
 export type DashboardsQueryVariables = Exact<{ [key: string]: never }>;

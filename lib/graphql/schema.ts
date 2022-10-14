@@ -5,7 +5,7 @@ export const typeDefs = gql`
     dashboards: [Dashboard!]!
     dashboard(id: ID!): Dashboard
     coinInfo: CoinInfo!
-    prices(ids: [String!]!, vsCurrencies: [String!]!): [PriceResponse!]!
+    prices(ids: [String!]!, vsCurrencies: [String!]!): [CryptoPair!]!
   }
 
   type Mutation {
@@ -31,12 +31,6 @@ export const typeDefs = gql`
     coinId: String!
     vsCurrency: String!
     price: Float
-  }
-
-  type PriceResponse {
-    coinId: String!
-    vsCurrency: String!
-    price: Float!
   }
 
   type Dashboard @entity {
