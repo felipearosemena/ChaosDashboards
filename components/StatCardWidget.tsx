@@ -47,6 +47,7 @@ export const StatCardWidget: React.FC<StatCardWidgetProps> = ({
   vsCoin,
   price,
 }) => {
+  const displayPrice = price && price > 1 ? price.toFixed(2) : price?.toFixed(5);
   return (
     <Card>
       <CardGrid>
@@ -57,7 +58,7 @@ export const StatCardWidget: React.FC<StatCardWidgetProps> = ({
           </Pair>
           <Source>Source: Coinbase</Source>
         </CardHeader>
-        <Price>{price ? price.toFixed(2) : <CircularProgress size={16} />}</Price>
+        <Price>{price ? displayPrice : <CircularProgress size={16} />}</Price>
       </CardGrid>
     </Card>
   );

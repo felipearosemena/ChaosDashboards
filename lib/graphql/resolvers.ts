@@ -73,25 +73,27 @@ const resolvers: Resolvers = {
           ids: dedupe(ids).join(","),
           vs_currencies: dedupe(vsCurrencies).join(","),
         });
-    
+
         const prices: PricePair[] = [];
         for (const [coinId] of Object.entries(response)) {
           const responseVsCurrencies = response[coinId];
-          for (const [vsCurrency, price] of Object.entries(responseVsCurrencies)) {
+          for (const [vsCurrency, price] of Object.entries(
+            responseVsCurrencies
+          )) {
             prices.push({
               coinId,
               vsCurrency,
-              price: 1 / price, // Need to invert the value due to how coingecko returns the values
+              price,
             });
           }
         }
-    
+
         return prices;
       } catch (error) {
         console.log(error);
         throw new Error("Coingecko API Error");
       }
-    }
+    },
   },
   Mutation: {
     createDashboard: async (_: any, { title }) => {
@@ -159,7 +161,7 @@ const resolvers: Resolvers = {
         throw new Error("Failed to add pair");
       }
 
-      return fromDbObject({ ...result, pairs });;
+      return fromDbObject({ ...result, pairs });
     },
   },
 };

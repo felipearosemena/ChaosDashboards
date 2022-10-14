@@ -143,6 +143,7 @@ export default function VirtualizedAutocomplete({
       PopperComponent={StyledPopper}
       ListboxComponent={ListboxComponent}
       getOptionDisabled={option => option.disabled}
+      isOptionEqualToValue={(option, value) => option.label === value.label}
       onChange={(e, value) => value && onChange(value)}
       options={options}
       getOptionLabel={(option) => option.label}

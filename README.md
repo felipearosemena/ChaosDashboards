@@ -41,6 +41,7 @@ Credentials are saved to `.env.local.sample` for ease of share with the tester.
 - [x] Server side storage
 - [x] Initial coin data fetching error handling
 - [x] Disable selected pairs in dashboard
+- [x] Add missing "inverse" options for unsopported currencies in api -> btc/usdt -> usdt/btc
 - [ ] Tests
 - [ ] Responsive styles
 - [ ] Graceful widget + image loading
