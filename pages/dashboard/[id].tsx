@@ -36,6 +36,9 @@ const useLazyPrices = (pairs: CryptoPair[] = [], coinInfo?: CoinInfo) => {
               curr.ids.push(pair.coinId);
               curr.vsCurrencies.push(pair.vsCurrency);
             } else {
+              // If the pair's vsCurrency isn't supported
+              // try flipping the currencies so we're using the vsCurrency
+              // corresponding to the pair's `coinId` 
               const vsCurrency = coinsById[pair.coinId]?.symbol;
               const id = coinsBySymbol[pair.vsCurrency]?.id;
 
