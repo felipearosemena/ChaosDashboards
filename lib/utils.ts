@@ -121,7 +121,6 @@ export const useCryptoPairOptions = (
     };
 
     if (pairs && coinInfo) {
-      console.log("setting options");
       
       setOptions(getOptions());
     }
