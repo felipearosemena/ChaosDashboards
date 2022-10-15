@@ -49,8 +49,7 @@ const resolvers: Resolvers = {
           id: coin.id || "",
           name: coin.name || "",
           symbol: coin.symbol || "",
-          image: coin.image || "",
-          price: coin.current_price || 0,
+          image: coin.image || ""
         }));
         const coinSymbols = coins.map((coin) => coin.symbol);
 
