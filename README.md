@@ -25,10 +25,7 @@ Once the server starts, visit: `http://localhost:3000`
 ## API
 
 ### `/api/graphql`
-All the API is driven via graphql. Visit `/api/graphql` in the browser to access the Yoga playground.
-
-`coinInfo` & `prices` Queries hit the coingecko api directly. They cannot be abused or we'll hit the rate limit for the free tier.
-
+All the API is driven via graphql. Visit `/api/graphql` in the browser to access the Yoga playground and browse the schema.
 
 ## Improvements
 
