@@ -55,12 +55,6 @@ const resolvers: Resolvers = {
           let key = priceDictKey(vsCoin?.id, coin?.symbol);
           let price = priceDict[key]?.price;
 
-          if (!price) {
-            key = priceDictKey(pair.coinId, pair.vsCurrency);
-            price = priceDict[key]?.price;
-            price = 1 / price;
-          }
-
           return { coin, vsCoin, price, key };
         });
       }

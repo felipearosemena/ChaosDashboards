@@ -110,6 +110,8 @@ const getSimplePricesArguments = (
 
 export const getPrices = async (pairs: CryptoPair[] = [], coinInfo: CoinInfo) => {
   const { ids, vsCurrencies } = getSimplePricesArguments(pairs, coinInfo);
+  const { coinsById, coinsBySymbol } = getCoinMap(coinInfo.coins);
+
   try {
     const response = await client.simplePrice({
       ids: dedupe(ids).join(","),
@@ -124,6 +126,15 @@ export const getPrices = async (pairs: CryptoPair[] = [], coinInfo: CoinInfo) =>
           coinId,
           vsCurrency,
           price,
+        });
+
+        // Push the inverse price as well
+        const coin = coinsById[coinId]
+        const vsCurrencyCoin = coinsBySymbol[vsCurrency]
+        prices.push({
+          coinId: vsCurrencyCoin.id,
+          vsCurrency: coin.symbol,
+          price: 1 / price,
         });
       }
     }
