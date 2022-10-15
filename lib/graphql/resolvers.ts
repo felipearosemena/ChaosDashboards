@@ -41,7 +41,7 @@ const resolvers: Resolvers = {
           coingeckoClient.coinMarket({
             vs_currency: "usd",
             ids: "",
-            per_page: 40, // Arbitrary number of tokens to load initially. Assuming our universe of tokens is known and
+            per_page: 40, // Arbitrary number of tokens to load initially.
           }),
         ]);
 
