@@ -27,10 +27,6 @@ Once the server starts, visit: `http://localhost:3000`
 ### `/api/graphql`
 All the API is driven via graphql. Visit `/api/graphql` in the browser to access the Yoga playground.
 
-Any Query or Mutation that interacts with a `Dashboard` or it's `CryptoPair`s reads and writes from a MongoDB instance.
-
-Credentials are saved to `.env.local.sample` for ease of share with the tester.
-
 `coinInfo` & `prices` Queries hit the coingecko api directly. They cannot be abused or we'll hit the rate limit for the free tier.
 
 
