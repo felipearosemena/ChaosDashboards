@@ -7,11 +7,11 @@ import Popper from "@mui/material/Popper";
 import { useTheme, styled } from "@mui/material/styles";
 import { VariableSizeList, ListChildComponentProps } from "react-window";
 import Typography from "@mui/material/Typography";
-import { CryptoPair } from "lib/graphql/generated";
+import { CryptoPairOption } from "lib/graphql/generated";
 
 const LISTBOX_PADDING = 8; // px
 
-type CryptoPairOption = CryptoPair & { disabled: boolean };
+type AutocompleteOption = CryptoPairOption & { disabled: boolean };
 
 function renderRow(props: ListChildComponentProps) {
   const { data, index, style } = props;
@@ -124,8 +124,8 @@ const StyledPopper = styled(Popper)({
 });
 
 type VirtualizedAutocompleteProps = {
-  options: CryptoPairOption[];
-  onChange: (option: CryptoPairOption) => void;
+  options: AutocompleteOption[];
+  onChange: (option: AutocompleteOption) => void;
   disabled: boolean
 };
 
