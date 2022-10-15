@@ -1,15 +1,27 @@
-import { Resolvers, Dashboard, PricePair } from "./generated";
+import { Resolvers, Dashboard, CoinInfo, CryptoPairOption } from "./generated";
 import { DashboardDbObject } from "./generated";
 import { connect } from "../store";
 import { ObjectId } from "mongodb";
-import { client as coingeckoClient } from "lib/coingecko";
-import { dedupe } from "lib/utils";
+import { getCoinInfo, getPrices } from "lib/coingecko";
+import { getCoinMap, priceDictKey } from "lib/utils";
+import { keyBy } from "lodash";
 
 const dbPromise = connect();
 
-const getCollection = async () => {
+const getDashboardsCollection = async () => {
   const db = await dbPromise;
   return db.collection<Omit<DashboardDbObject, "_id">>("dashboards");
+};
+
+const getDashboard = async (id: string) => {
+  const collection = await getDashboardsCollection();
+  const dbObject = await collection.findOne({
+    _id: ObjectId.createFromHexString(id),
+  });
+
+  const result = dbObject ? fromDbObject(dbObject) : null;
+
+  return result;
 };
 
 const fromDbObject = (dbObject: DashboardDbObject): Dashboard => ({
@@ -21,82 +33,90 @@ const fromDbObject = (dbObject: DashboardDbObject): Dashboard => ({
 const resolvers: Resolvers = {
   Query: {
     dashboards: async () => {
-      const collection = await getCollection();
+      const collection = await getDashboardsCollection();
       return await collection.find().map(fromDbObject).toArray();
     },
-    dashboard: async (_: any, { id }) => {
-      const collection = await getCollection();
-      const dbObject = await collection.findOne({
-        _id: ObjectId.createFromHexString(id),
-      });
+    dashboard: async (_: any, { id }) => getDashboard(id),
+    widgets: async (_: any, { dashboardId }) => {
+      const coinInfo = await getCoinInfo();
+      const dashboard = await getDashboard(dashboardId);
 
-      const result = dbObject ? fromDbObject(dbObject) : null;
-
-      return result;
-    },
-    coinInfo: async (_: any) => {
-      try {
-        const [allSupportedCurrencies, coinMarket] = await Promise.all([
-          coingeckoClient.simpleSupportedCurrencies(),
-          coingeckoClient.coinMarket({
-            vs_currency: "usd",
-            ids: "",
-            per_page: 40, // Arbitrary number of tokens to load initially.
-          }),
-        ]);
-
-        const coins = coinMarket.map((coin) => ({
-          id: coin.id || "",
-          name: coin.name || "",
-          symbol: coin.symbol || "",
-          image: coin.image || ""
-        }));
-        const coinSymbols = coins.map((coin) => coin.symbol);
-
-        const supportedCurrencies = allSupportedCurrencies.filter((symbol) =>
-          coinSymbols.includes(symbol)
+      if (dashboard) {
+        const pricePairs = await getPrices(dashboard.pairs, coinInfo);
+        const { coinsById, coinsBySymbol } = getCoinMap(coinInfo.coins);
+        const priceDict = keyBy(pricePairs, ({ coinId, vsCurrency }) =>
+          priceDictKey(coinId, vsCurrency)
         );
 
-        return {
-          supportedCurrencies,
-          coins,
-        };
-      } catch (error) {
-        console.log(error);
-        throw new Error("Coingecko API Error");
+        return dashboard.pairs.map((pair) => {
+          const coin = coinsById[pair.coinId];
+          const vsCoin = coinsBySymbol[pair.vsCurrency];
+
+          let key = priceDictKey(vsCoin?.id, coin?.symbol);
+          let price = priceDict[key]?.price;
+
+          if (!price) {
+            key = priceDictKey(pair.coinId, pair.vsCurrency);
+            price = priceDict[key]?.price;
+            price = 1 / price;
+          }
+
+          return { coin, vsCoin, price, key };
+        });
       }
+
+      return [];
     },
-    prices: async (_: any, { ids, vsCurrencies }) => {
-      try {
-        const response = await coingeckoClient.simplePrice({
-          ids: dedupe(ids).join(","),
-          vs_currencies: dedupe(vsCurrencies).join(","),
+    pairOptions: async () => {
+      const coinInfo: CoinInfo = await getCoinInfo();
+      const { coinsById, coinsBySymbol } = getCoinMap(coinInfo?.coins);
+
+      if (coinInfo) {
+        const options: { [key: string]: CryptoPairOption } = {};
+        // Nested loop, not ideal for performance if we have a large number of token pairs to support
+        // But should be ok if we are working with a limited number
+        coinInfo.supportedCurrencies.forEach(({ symbol: vsCurrency }) => {
+          coinInfo.coins
+            .filter((coin) => coin.symbol && coin.symbol !== vsCurrency)
+            .map(({ id }) => {
+              const vsCurrencyCoin = coinsBySymbol[vsCurrency];
+              const coin = coinsById[id];
+
+              // Option for vsCurrencyCoin / coin -> eg: BTC / XMR
+              const option = {
+                coinId: coin.id,
+                vsCurrency: vsCurrencyCoin.symbol,
+                label: vsCurrencyCoin.symbol + "/" + coin.symbol,
+                disabled: false,
+              };
+
+              if (!options[option.label]) {
+                options[option.label] = option;
+              }
+
+              // Option for coin / vsCurrency -> eg XMR / BTC
+              const inverseOption = {
+                coinId: vsCurrencyCoin.id,
+                vsCurrency: coin.symbol,
+                label: coin.symbol + "/" + vsCurrencyCoin.symbol,
+                disabled: false,
+              };
+
+              if (!options[inverseOption.label]) {
+                options[inverseOption.label] = inverseOption;
+              }
+            });
         });
 
-        const prices: PricePair[] = [];
-        for (const [coinId] of Object.entries(response)) {
-          const responseVsCurrencies = response[coinId];
-          for (const [vsCurrency, price] of Object.entries(
-            responseVsCurrencies
-          )) {
-            prices.push({
-              coinId,
-              vsCurrency,
-              price,
-            });
-          }
-        }
-
-        return prices;
-      } catch (error) {
-        console.log(error);
-        throw new Error("Coingecko API Error");
+        return Object.values(options);
+      } else {
+        return [];
       }
     },
   },
   Mutation: {
     createDashboard: async (_: any, { title }) => {
-      const collection = await getCollection();
+      const collection = await getDashboardsCollection();
       const data = {
         title,
         pairs: [],
@@ -109,7 +129,7 @@ const resolvers: Resolvers = {
       });
     },
     deleteDashboard: async (_: any, { id }) => {
-      const collection = await getCollection();
+      const collection = await getDashboardsCollection();
       const result = await collection.deleteOne({
         _id: ObjectId.createFromHexString(id),
       });
@@ -121,7 +141,7 @@ const resolvers: Resolvers = {
       }
     },
     addCryptoPair: async (_: any, { dashboardId, coinId, vsCurrency }) => {
-      const collection = await getCollection();
+      const collection = await getDashboardsCollection();
       const result = await collection.findOne({
         _id: new ObjectId(dashboardId),
       });

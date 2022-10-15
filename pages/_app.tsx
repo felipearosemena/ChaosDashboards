@@ -7,7 +7,6 @@ import {
   InMemoryCache,
 } from "@apollo/client";
 import fetch from "node-fetch"; // Use node-fetch here to allow SSR
-import { CoinDataProvider } from "components/CoinDataProvider";
 import Head from "next/head";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Layout } from "components/Layout";
@@ -34,17 +33,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         })}
       >
         <CssBaseline />
-        <CoinDataProvider>
-          <Head>
-            <meta
-              name="viewport"
-              content="initial-scale=1, width=device-width"
-            />
-          </Head>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </CoinDataProvider>
+
+        <Head>
+          <meta name="viewport" content="initial-scale=1, width=device-width" />
+        </Head>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
       </ThemeProvider>
     </ApolloProvider>
   );

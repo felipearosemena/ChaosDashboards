@@ -1,8 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useContext, useEffect, useState } from "react";
-import { CoinDataContext } from "components/CoinDataProvider";
+import { useMemo } from "react";
 import { Card } from "components/Layout";
 import { Box, CircularProgress, Grid } from "@mui/material";
 import { StatCardWidget } from "components/StatCardWidget";
@@ -10,95 +9,62 @@ import Autocomplete from "components/Autocomplete";
 import {
   useDashboardByIdQuery,
   useAddCryptoPairMutation,
-  usePricesLazyQuery,
-  CryptoPair,
-  PricePair,
-  CoinInfo,
+  useWidgetsQuery,
+  useCryptoPairOptionsQuery,
 } from "lib/graphql/generated";
-import { CoinInfoError } from "components/CoinInfoError";
-import { getCoinMap, useCryptoPairOptions, useWidgetList } from "lib/utils";
-
-const useLazyPrices = (pairs: CryptoPair[] = [], coinInfo?: CoinInfo) => {
-  const [fetchPrices, { loading }] = usePricesLazyQuery();
-  const [pricePairs, setPricePairs] = useState<PricePair[]>([]);
-
-  useEffect(() => {
-    if (pairs.length && coinInfo) {
-      const getPrices = async () => {
-        const { coins, supportedCurrencies } = coinInfo;
-        const { coinsById, coinsBySymbol } = getCoinMap(coins);
-        const { ids, vsCurrencies } = pairs.reduce<{
-          ids: string[];
-          vsCurrencies: string[];
-        }>(
-          (curr, pair) => {
-            if (supportedCurrencies.includes(pair.vsCurrency)) {
-              curr.ids.push(pair.coinId);
-              curr.vsCurrencies.push(pair.vsCurrency);
-            } else {
-              // If the pair's vsCurrency isn't supported
-              // try flipping the currencies so we're using the vsCurrency
-              // corresponding to the pair's `coinId` 
-              const vsCurrency = coinsById[pair.coinId]?.symbol;
-              const id = coinsBySymbol[pair.vsCurrency]?.id;
-
-              if (vsCurrency && id) {
-                curr.ids.push(id);
-                curr.vsCurrencies.push(vsCurrency);
-              }
-            }
-            return curr;
-          },
-          {
-            ids: [],
-            vsCurrencies: [],
-          }
-        );
-
-        const { data } = await fetchPrices({
-          variables: { ids, vsCurrencies },
-        });
-
-        if (data) {
-          setPricePairs(data.prices);
-        }
-      };
-
-      getPrices();
-    }
-  }, [pairs, coinInfo, fetchPrices]);
-
-  return { pricePairs, loading };
-};
 
 const DashboardPage: NextPage = () => {
   const router = useRouter();
   const id = typeof router.query.id === "string" ? router.query.id : "";
   const {
-    data: coinInfoData,
-    loading: loadingCoinInfo,
-    error: coinInfoError,
-  } = useContext(CoinDataContext);
-  const coinInfo = coinInfoData?.coinInfo;
-  const {
     data,
     loading: loadingDashboard,
     error: dashboardError,
-    refetch,
   } = useDashboardByIdQuery({
     variables: { id },
     skip: !id.length,
+  });
+
+  const dashboard = data?.dashboard;
+  const {
+    data: widgetData,
+    loading: loadingWidgets,
+    error: widgetsError,
+    refetch,
+  } = useWidgetsQuery({
+    variables: {
+      dashboardId: dashboard?.id || "",
+    },
+    skip: !dashboard?.id,
+    notifyOnNetworkStatusChange: true,
   });
   const [addCryptoPair, { loading: addingPair }] = useAddCryptoPairMutation({
     onCompleted() {
       refetch();
     },
   });
-  const dashboard = data?.dashboard;
 
-  const { pricePairs } = useLazyPrices(dashboard?.pairs, coinInfo);
-  const options = useCryptoPairOptions(coinInfo, dashboard?.pairs);
-  const widgets = useWidgetList(dashboard?.pairs, coinInfo?.coins, pricePairs);
+  const {
+    data: optionsData,
+    loading: loadingOptions,
+  } = useCryptoPairOptionsQuery();
+
+  const widgets = widgetData?.widgets;
+  const pairOptions = optionsData?.pairOptions;
+  const options = useMemo(() => {
+    return pairOptions && widgets
+      ? pairOptions.map((option) => {
+          return {
+            ...option,
+            disabled: !!widgets.find(
+              (widget) =>
+                widget.coin.id === option.coinId &&
+                widget.vsCoin.symbol === option.vsCurrency
+            ),
+          };
+        })
+      : [];
+  }, [pairOptions, widgets]);
 
   const addNewPair = (newCoinId: string, newVsCurrency: string) => {
     const dashboardId = dashboard?.id;
@@ -113,7 +79,7 @@ const DashboardPage: NextPage = () => {
     }
   };
 
-  if (loadingCoinInfo || !dashboard) {
+  if (loadingDashboard) {
     return (
       <Card>
         <CircularProgress />
@@ -121,16 +87,12 @@ const DashboardPage: NextPage = () => {
     );
   }
 
-  if (coinInfoError) {
-    return <CoinInfoError message={coinInfoError.message} />;
-  }
-
-  if (dashboardError) {
+  if (dashboardError || widgetsError) {
     return (
       <Card>
         <h1>Failed to load dashboard</h1>
         <p>
-          {dashboardError.message} - {dashboardError.extraInfo}
+          We were not able to load this dashboard. Try refreshing your browser.
         </p>
       </Card>
     );
@@ -139,7 +101,7 @@ const DashboardPage: NextPage = () => {
   return (
     <div>
       <Head>
-        <title>Dashboard: {dashboard?.title}</title>
+        <title>{dashboard && `Dashboard: ${dashboard?.title}`}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -150,20 +112,20 @@ const DashboardPage: NextPage = () => {
 
             <Box display={"inline-flex"} alignItems={"center"}>
               <Autocomplete
-                disabled={addingPair || loadingDashboard}
+                disabled={addingPair || !options.length}
                 options={options}
                 onChange={(option) =>
                   addNewPair(option.coinId, option.vsCurrency)
                 }
               />
-              {(addingPair || loadingDashboard) && (
+              {(addingPair || loadingWidgets || loadingOptions) && (
                 <CircularProgress size={24} style={{ marginLeft: 20 }} />
               )}
             </Box>
           </Card>
         </Box>
         <Grid container spacing={3}>
-          {widgets.map((widget) => (
+          {widgets?.map((widget) => (
             <Grid
               item
               xs={6}

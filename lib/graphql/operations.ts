@@ -10,26 +10,6 @@ export const typeDefs = gql`
     }
   }
 
-  query CoinInfo {
-    coinInfo {
-      coins {
-        id
-        symbol
-        name
-        image
-      }
-      supportedCurrencies
-    }
-  }
-
-  query Prices($ids: [String!]!, $vsCurrencies: [String!]!) {
-    prices(ids: $ids, vsCurrencies: $vsCurrencies) {
-      coinId
-      vsCurrency
-      price
-    }
-  }
-
   query Dashboards {
     dashboards {
       ...DashboardFragment
@@ -39,6 +19,32 @@ export const typeDefs = gql`
   query DashboardById($id: ID!) {
     dashboard(id: $id) {
       ...DashboardFragment
+    }
+  }
+
+  query Widgets($dashboardId: ID!) {
+    widgets(dashboardId: $dashboardId) {
+      coin {
+        id
+        symbol
+        name
+        image
+      }
+      vsCoin {
+        id
+        symbol
+        name
+        image
+      }
+      price
+    }
+  }
+
+  query CryptoPairOptions {
+    pairOptions {
+      coinId
+      vsCurrency
+      label
     }
   }
 

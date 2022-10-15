@@ -35,11 +35,17 @@ export type Coin = {
 
 export type CoinInfo = {
   coins: Array<Coin>;
-  supportedCurrencies: Array<Scalars["String"]>;
+  supportedCurrencies: Array<SupportedCurrency>;
 };
 
 export type CryptoPair = {
   coinId: Scalars["String"];
+  vsCurrency: Scalars["String"];
+};
+
+export type CryptoPairOption = {
+  coinId: Scalars["String"];
+  label: Scalars["String"];
   vsCurrency: Scalars["String"];
 };
 
@@ -76,23 +82,32 @@ export type PricePair = {
 };
 
 export type Query = {
-  coinInfo: CoinInfo;
   dashboard?: Maybe<Dashboard>;
   dashboards: Array<Dashboard>;
-  prices: Array<PricePair>;
+  pairOptions: Array<CryptoPairOption>;
+  widgets: Array<StartCardWidget>;
 };
 
 export type QueryDashboardArgs = {
   id: Scalars["ID"];
 };
 
-export type QueryPricesArgs = {
-  ids: Array<Scalars["String"]>;
-  vsCurrencies: Array<Scalars["String"]>;
+export type QueryWidgetsArgs = {
+  dashboardId: Scalars["ID"];
+};
+
+export type StartCardWidget = {
+  coin: Coin;
+  price: Scalars["Float"];
+  vsCoin: Coin;
 };
 
 export type SuccessResponse = {
   success?: Maybe<Scalars["Boolean"]>;
+};
+
+export type SupportedCurrency = {
+  symbol: Scalars["String"];
 };
 
 export type AdditionalEntityFields = {
@@ -211,14 +226,17 @@ export type ResolversTypes = {
   String: ResolverTypeWrapper<Scalars["String"]>;
   CoinInfo: ResolverTypeWrapper<CoinInfo>;
   CryptoPair: ResolverTypeWrapper<CryptoPair>;
+  CryptoPairOption: ResolverTypeWrapper<CryptoPairOption>;
   Dashboard: ResolverTypeWrapper<Dashboard>;
   Mutation: ResolverTypeWrapper<{}>;
   ID: ResolverTypeWrapper<Scalars["ID"]>;
   PricePair: ResolverTypeWrapper<PricePair>;
   Float: ResolverTypeWrapper<Scalars["Float"]>;
   Query: ResolverTypeWrapper<{}>;
+  StartCardWidget: ResolverTypeWrapper<StartCardWidget>;
   SuccessResponse: ResolverTypeWrapper<SuccessResponse>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
+  SupportedCurrency: ResolverTypeWrapper<SupportedCurrency>;
   AdditionalEntityFields: AdditionalEntityFields;
 };
 
@@ -228,14 +246,17 @@ export type ResolversParentTypes = {
   String: Scalars["String"];
   CoinInfo: CoinInfo;
   CryptoPair: CryptoPair;
+  CryptoPairOption: CryptoPairOption;
   Dashboard: Dashboard;
   Mutation: {};
   ID: Scalars["ID"];
   PricePair: PricePair;
   Float: Scalars["Float"];
   Query: {};
+  StartCardWidget: StartCardWidget;
   SuccessResponse: SuccessResponse;
   Boolean: Scalars["Boolean"];
+  SupportedCurrency: SupportedCurrency;
   AdditionalEntityFields: AdditionalEntityFields;
 };
 
@@ -343,7 +364,7 @@ export type CoinInfoResolvers<
 > = {
   coins?: Resolver<Array<ResolversTypes["Coin"]>, ParentType, ContextType>;
   supportedCurrencies?: Resolver<
-    Array<ResolversTypes["String"]>,
+    Array<ResolversTypes["SupportedCurrency"]>,
     ParentType,
     ContextType
   >;
@@ -355,6 +376,16 @@ export type CryptoPairResolvers<
   ParentType extends ResolversParentTypes["CryptoPair"] = ResolversParentTypes["CryptoPair"]
 > = {
   coinId?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  vsCurrency?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type CryptoPairOptionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["CryptoPairOption"] = ResolversParentTypes["CryptoPairOption"]
+> = {
+  coinId?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  label?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   vsCurrency?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -414,7 +445,6 @@ export type QueryResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
 > = {
-  coinInfo?: Resolver<ResolversTypes["CoinInfo"], ParentType, ContextType>;
   dashboard?: Resolver<
     Maybe<ResolversTypes["Dashboard"]>,
     ParentType,
@@ -426,12 +456,27 @@ export type QueryResolvers<
     ParentType,
     ContextType
   >;
-  prices?: Resolver<
-    Array<ResolversTypes["PricePair"]>,
+  pairOptions?: Resolver<
+    Array<ResolversTypes["CryptoPairOption"]>,
+    ParentType,
+    ContextType
+  >;
+  widgets?: Resolver<
+    Array<ResolversTypes["StartCardWidget"]>,
     ParentType,
     ContextType,
-    RequireFields<QueryPricesArgs, "ids" | "vsCurrencies">
+    RequireFields<QueryWidgetsArgs, "dashboardId">
   >;
+};
+
+export type StartCardWidgetResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["StartCardWidget"] = ResolversParentTypes["StartCardWidget"]
+> = {
+  coin?: Resolver<ResolversTypes["Coin"], ParentType, ContextType>;
+  price?: Resolver<ResolversTypes["Float"], ParentType, ContextType>;
+  vsCoin?: Resolver<ResolversTypes["Coin"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type SuccessResponseResolvers<
@@ -442,15 +487,26 @@ export type SuccessResponseResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type SupportedCurrencyResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["SupportedCurrency"] = ResolversParentTypes["SupportedCurrency"]
+> = {
+  symbol?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type Resolvers<ContextType = any> = {
   Coin?: CoinResolvers<ContextType>;
   CoinInfo?: CoinInfoResolvers<ContextType>;
   CryptoPair?: CryptoPairResolvers<ContextType>;
+  CryptoPairOption?: CryptoPairOptionResolvers<ContextType>;
   Dashboard?: DashboardResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   PricePair?: PricePairResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  StartCardWidget?: StartCardWidgetResolvers<ContextType>;
   SuccessResponse?: SuccessResponseResolvers<ContextType>;
+  SupportedCurrency?: SupportedCurrencyResolvers<ContextType>;
 };
 
 export type DirectiveResolvers<ContextType = any> = {
@@ -468,24 +524,6 @@ export type DashboardFragmentFragment = {
   id: string;
   title: string;
   pairs: Array<{ coinId: string; vsCurrency: string }>;
-};
-
-export type CoinInfoQueryVariables = Exact<{ [key: string]: never }>;
-
-export type CoinInfoQuery = {
-  coinInfo: {
-    supportedCurrencies: Array<string>;
-    coins: Array<{ id: string; symbol: string; name: string; image: string }>;
-  };
-};
-
-export type PricesQueryVariables = Exact<{
-  ids: Array<Scalars["String"]> | Scalars["String"];
-  vsCurrencies: Array<Scalars["String"]> | Scalars["String"];
-}>;
-
-export type PricesQuery = {
-  prices: Array<{ coinId: string; vsCurrency: string; price: number }>;
 };
 
 export type DashboardsQueryVariables = Exact<{ [key: string]: never }>;
@@ -508,6 +546,24 @@ export type DashboardByIdQuery = {
     title: string;
     pairs: Array<{ coinId: string; vsCurrency: string }>;
   } | null;
+};
+
+export type WidgetsQueryVariables = Exact<{
+  dashboardId: Scalars["ID"];
+}>;
+
+export type WidgetsQuery = {
+  widgets: Array<{
+    price: number;
+    coin: { id: string; symbol: string; name: string; image: string };
+    vsCoin: { id: string; symbol: string; name: string; image: string };
+  }>;
+};
+
+export type CryptoPairOptionsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type CryptoPairOptionsQuery = {
+  pairOptions: Array<{ coinId: string; vsCurrency: string; label: string }>;
 };
 
 export type CreateDashboardMutationVariables = Exact<{
@@ -554,124 +610,6 @@ export const DashboardFragmentFragmentDoc = gql`
     }
   }
 `;
-export const CoinInfoDocument = gql`
-  query CoinInfo {
-    coinInfo {
-      coins {
-        id
-        symbol
-        name
-        image
-      }
-      supportedCurrencies
-    }
-  }
-`;
-
-/**
- * __useCoinInfoQuery__
- *
- * To run a query within a React component, call `useCoinInfoQuery` and pass it any options that fit your needs.
- * When your component renders, `useCoinInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCoinInfoQuery({
- *   variables: {
- *   },
- * });
- */
-export function useCoinInfoQuery(
-  baseOptions?: ApolloReactHooks.QueryHookOptions<
-    CoinInfoQuery,
-    CoinInfoQueryVariables
-  >
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useQuery<CoinInfoQuery, CoinInfoQueryVariables>(
-    CoinInfoDocument,
-    options
-  );
-}
-export function useCoinInfoLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    CoinInfoQuery,
-    CoinInfoQueryVariables
-  >
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useLazyQuery<CoinInfoQuery, CoinInfoQueryVariables>(
-    CoinInfoDocument,
-    options
-  );
-}
-export type CoinInfoQueryHookResult = ReturnType<typeof useCoinInfoQuery>;
-export type CoinInfoLazyQueryHookResult = ReturnType<
-  typeof useCoinInfoLazyQuery
->;
-export type CoinInfoQueryResult = ApolloReactCommon.QueryResult<
-  CoinInfoQuery,
-  CoinInfoQueryVariables
->;
-export const PricesDocument = gql`
-  query Prices($ids: [String!]!, $vsCurrencies: [String!]!) {
-    prices(ids: $ids, vsCurrencies: $vsCurrencies) {
-      coinId
-      vsCurrency
-      price
-    }
-  }
-`;
-
-/**
- * __usePricesQuery__
- *
- * To run a query within a React component, call `usePricesQuery` and pass it any options that fit your needs.
- * When your component renders, `usePricesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePricesQuery({
- *   variables: {
- *      ids: // value for 'ids'
- *      vsCurrencies: // value for 'vsCurrencies'
- *   },
- * });
- */
-export function usePricesQuery(
-  baseOptions: ApolloReactHooks.QueryHookOptions<
-    PricesQuery,
-    PricesQueryVariables
-  >
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useQuery<PricesQuery, PricesQueryVariables>(
-    PricesDocument,
-    options
-  );
-}
-export function usePricesLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    PricesQuery,
-    PricesQueryVariables
-  >
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useLazyQuery<PricesQuery, PricesQueryVariables>(
-    PricesDocument,
-    options
-  );
-}
-export type PricesQueryHookResult = ReturnType<typeof usePricesQuery>;
-export type PricesLazyQueryHookResult = ReturnType<typeof usePricesLazyQuery>;
-export type PricesQueryResult = ApolloReactCommon.QueryResult<
-  PricesQuery,
-  PricesQueryVariables
->;
 export const DashboardsDocument = gql`
   query Dashboards {
     dashboards {
@@ -786,6 +724,131 @@ export type DashboardByIdLazyQueryHookResult = ReturnType<
 export type DashboardByIdQueryResult = ApolloReactCommon.QueryResult<
   DashboardByIdQuery,
   DashboardByIdQueryVariables
+>;
+export const WidgetsDocument = gql`
+  query Widgets($dashboardId: ID!) {
+    widgets(dashboardId: $dashboardId) {
+      coin {
+        id
+        symbol
+        name
+        image
+      }
+      vsCoin {
+        id
+        symbol
+        name
+        image
+      }
+      price
+    }
+  }
+`;
+
+/**
+ * __useWidgetsQuery__
+ *
+ * To run a query within a React component, call `useWidgetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWidgetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWidgetsQuery({
+ *   variables: {
+ *      dashboardId: // value for 'dashboardId'
+ *   },
+ * });
+ */
+export function useWidgetsQuery(
+  baseOptions: ApolloReactHooks.QueryHookOptions<
+    WidgetsQuery,
+    WidgetsQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useQuery<WidgetsQuery, WidgetsQueryVariables>(
+    WidgetsDocument,
+    options
+  );
+}
+export function useWidgetsLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+    WidgetsQuery,
+    WidgetsQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useLazyQuery<WidgetsQuery, WidgetsQueryVariables>(
+    WidgetsDocument,
+    options
+  );
+}
+export type WidgetsQueryHookResult = ReturnType<typeof useWidgetsQuery>;
+export type WidgetsLazyQueryHookResult = ReturnType<typeof useWidgetsLazyQuery>;
+export type WidgetsQueryResult = ApolloReactCommon.QueryResult<
+  WidgetsQuery,
+  WidgetsQueryVariables
+>;
+export const CryptoPairOptionsDocument = gql`
+  query CryptoPairOptions {
+    pairOptions {
+      coinId
+      vsCurrency
+      label
+    }
+  }
+`;
+
+/**
+ * __useCryptoPairOptionsQuery__
+ *
+ * To run a query within a React component, call `useCryptoPairOptionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCryptoPairOptionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCryptoPairOptionsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCryptoPairOptionsQuery(
+  baseOptions?: ApolloReactHooks.QueryHookOptions<
+    CryptoPairOptionsQuery,
+    CryptoPairOptionsQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useQuery<
+    CryptoPairOptionsQuery,
+    CryptoPairOptionsQueryVariables
+  >(CryptoPairOptionsDocument, options);
+}
+export function useCryptoPairOptionsLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+    CryptoPairOptionsQuery,
+    CryptoPairOptionsQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useLazyQuery<
+    CryptoPairOptionsQuery,
+    CryptoPairOptionsQueryVariables
+  >(CryptoPairOptionsDocument, options);
+}
+export type CryptoPairOptionsQueryHookResult = ReturnType<
+  typeof useCryptoPairOptionsQuery
+>;
+export type CryptoPairOptionsLazyQueryHookResult = ReturnType<
+  typeof useCryptoPairOptionsLazyQuery
+>;
+export type CryptoPairOptionsQueryResult = ApolloReactCommon.QueryResult<
+  CryptoPairOptionsQuery,
+  CryptoPairOptionsQueryVariables
 >;
 export const CreateDashboardDocument = gql`
   mutation CreateDashboard($title: String!) {

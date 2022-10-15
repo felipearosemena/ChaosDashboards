@@ -11,7 +11,7 @@ import { CryptoPair } from "lib/graphql/generated";
 
 const LISTBOX_PADDING = 8; // px
 
-export type CryptoPairOption = CryptoPair & { label: string; disabled: boolean };
+type CryptoPairOption = CryptoPair & { disabled: boolean };
 
 function renderRow(props: ListChildComponentProps) {
   const { data, index, style } = props;

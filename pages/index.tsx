@@ -1,6 +1,5 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useContext } from "react";
 import { useRouter } from "next/router";
 import {
   Button,
@@ -14,19 +13,15 @@ import {
 } from "@mui/material";
 import { Card } from "components/Layout";
 import Rocket from "@mui/icons-material/ChevronRight";
-import { CoinDataContext } from "components/CoinDataProvider";
 import {
   DashboardsDocument,
   useDashboardsQuery,
   useDeleteDashboardMutation,
 } from "lib/graphql/generated";
-import { CoinInfoError } from "components/CoinInfoError";
 import { Close } from "@mui/icons-material";
 
 const Dashboards: NextPage = () => {
   const router = useRouter();
-  const { loading: loadingCoinInfo, error: coinInfoError } =
-    useContext(CoinDataContext);
   const { data, loading: loadingDashboards } = useDashboardsQuery({
     fetchPolicy: "cache-first",
   });
@@ -34,16 +29,12 @@ const Dashboards: NextPage = () => {
     refetchQueries: [{ query: DashboardsDocument }],
   });
 
-  if (loadingCoinInfo || loadingDashboards) {
+  if (loadingDashboards) {
     return (
       <Card>
         <CircularProgress />
       </Card>
     );
-  }
-
-  if (coinInfoError) {
-    return <CoinInfoError message={coinInfoError.message} />;
   }
 
   const dashboards = data?.dashboards || [];
