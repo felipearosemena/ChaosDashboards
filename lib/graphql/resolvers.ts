@@ -63,18 +63,19 @@ const resolvers: Resolvers = {
     },
     pairOptions: async () => {
       const coinInfo: CoinInfo = await getCoinInfo();
-      const { coinsById, coinsBySymbol } = getCoinMap(coinInfo?.coins);
+      const { coinsBySymbol } = getCoinMap(coinInfo?.coins);
 
       if (coinInfo) {
         const options: { [key: string]: CryptoPairOption } = {};
+        const { supportedCurrencies, coins } = coinInfo
+
         // Nested loop, not ideal for performance if we have a large number of token pairs to support
         // But should be ok if we are working with a limited number
-        coinInfo.supportedCurrencies.forEach(({ symbol: vsCurrency }) => {
-          coinInfo.coins
+        supportedCurrencies.forEach(({ symbol: vsCurrency }) => {
+          coins
             .filter((coin) => coin.symbol && coin.symbol !== vsCurrency)
-            .map(({ id }) => {
+            .forEach((coin) => {
               const vsCurrencyCoin = coinsBySymbol[vsCurrency];
-              const coin = coinsById[id];
 
               // Option for vsCurrencyCoin / coin -> eg: BTC / XMR
               const option = {
