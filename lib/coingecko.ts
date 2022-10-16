@@ -3,17 +3,17 @@ import { CoinInfo, CryptoPair, PricePair } from "./graphql/generated";
 import { dedupe, getCoinMap } from "./utils";
 
 type CoinInfoPromise = Promise<[string[], CoinMarket[]]>
-let coinInfoPromise: CoinInfoPromise
-const globalAny: any = global;
 
 const client = new CoinGeckoClient({
   timeout: 10000,
   autoRetry: false,
 });
 
+const globalAny: any = globalThis;
+let coinInfoPromise: CoinInfoPromise
 const cacheCoinInfoPromise = (promise: CoinInfoPromise) => {
   if (process.env.NODE_ENV === "development") {
-    globalAny.coinInfoPromise = promise;
+    globalAny._coinInfoPromise = promise;
   } else {
     coinInfoPromise = promise
   }
@@ -21,13 +21,13 @@ const cacheCoinInfoPromise = (promise: CoinInfoPromise) => {
 
 const getCoinInfoPromise = (): CoinInfoPromise | undefined => {
   if (process.env.NODE_ENV === "development") {
-    return globalAny.coinInfoPromise;
+    return globalAny._coinInfoPromise;
   } else {
     return coinInfoPromise
   }
 }
 
-export const getCoinInfo = async () => {
+export const getCoinInfo = async (): Promise<CoinInfo> => {
   try {
     let coinInfoPromise = getCoinInfoPromise()
 
