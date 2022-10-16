@@ -3,7 +3,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import { Card } from "components/Layout";
-import { Box, CircularProgress, Grid } from "@mui/material";
+import { Box, Button, CircularProgress, Grid } from "@mui/material";
 import { StatCardWidget } from "components/StatCardWidget";
 import Autocomplete from "components/Autocomplete";
 import {
@@ -44,10 +44,8 @@ const DashboardPage: NextPage = () => {
     },
   });
 
-  const {
-    data: optionsData,
-    loading: loadingOptions,
-  } = useCryptoPairOptionsQuery();
+  const { data: optionsData, loading: loadingOptions } =
+    useCryptoPairOptionsQuery();
 
   const widgets = widgetData?.widgets;
   const pairOptions = optionsData?.pairOptions;
@@ -91,9 +89,8 @@ const DashboardPage: NextPage = () => {
     return (
       <Card>
         <h1>Failed to load dashboard</h1>
-        <p>
-          We were not able to load this dashboard. Try refreshing your browser.
-        </p>
+        <p>We were not able to load this dashboard.</p>
+        <Button variant="outlined" size={"large"} onClick={() => router.replace("/")}>Back to Dashboards</Button>
       </Card>
     );
   }
