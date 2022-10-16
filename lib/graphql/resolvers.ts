@@ -19,9 +19,11 @@ const getDashboard = async (id: string) => {
     _id: ObjectId.createFromHexString(id),
   });
 
-  const result = dbObject ? fromDbObject(dbObject) : null;
+  if (!dbObject) {
+    throw new Error("Dashboard not found")
+  }
 
-  return result;
+  return fromDbObject(dbObject)
 };
 
 const fromDbObject = (dbObject: DashboardDbObject): Dashboard => ({
@@ -62,7 +64,7 @@ const resolvers: Resolvers = {
       return [];
     },
     pairOptions: async () => {
-      const coinInfo: CoinInfo = await getCoinInfo();
+      const coinInfo = await getCoinInfo();
       const { coinsBySymbol } = getCoinMap(coinInfo?.coins);
 
       if (coinInfo) {
