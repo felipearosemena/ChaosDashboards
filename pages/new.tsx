@@ -56,6 +56,7 @@ const NewDashboard: NextPage = () => {
           <h1>New Dashboard</h1>
           <Form onSubmit={onCreate}>
             <TextField
+              data-testid="new-dashboard-title"
               name="title"
               autoFocus
               label={"Name"}
@@ -64,6 +65,7 @@ const NewDashboard: NextPage = () => {
             />
             <Box sx={{ position: "relative", width: 180 }}>
               <Button
+                data-testid="new-dashboard-button"
                 style={{ height: "100%", width: "100%" }}
                 type="submit"
                 color="primary"

@@ -36,8 +36,9 @@ const NavBar = () => {
     {
       label: "Dashboards",
       path: "/",
+      testId: "nav-bar-dashboards-button",
     },
-    { label: "New", path: "/new" },
+    { label: "New", path: "/new", testId: "nav-bar-new-button" },
   ];
 
   return (
@@ -60,6 +61,7 @@ const NavBar = () => {
           {menuOptions.map((item) => (
             <ListItem key={item.path} disablePadding>
               <ListItemButton
+                data-testid={item.testId}
                 disableRipple
                 disabled={item.path === router.pathname}
                 onClick={() => {

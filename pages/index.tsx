@@ -56,6 +56,10 @@ const Dashboards: NextPage = () => {
                 <Divider />
                 {dashboards.map((dashboard) => {
                   const { pairs } = dashboard;
+                  const testId = dashboard.title
+                    .split(" ")
+                    .join("-")
+                    .toLowerCase();
                   return (
                     <ListItemButton
                       disableRipple
@@ -63,11 +67,11 @@ const Dashboards: NextPage = () => {
                       onClick={() => router.push(`/dashboard/${dashboard.id}`)}
                     >
                       <ListItemText primary={dashboard.title} />
-
                       {!!pairs.length && (
                         <Chip size={"small"} label={`${pairs.length}`} />
                       )}
                       <IconButton
+                        data-testid={`delete-dashboard-${testId}`}
                         disabled={deleting}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -88,6 +92,7 @@ const Dashboards: NextPage = () => {
               <h1>Welcome</h1>
               <p>Get started by creating your first dashboard.</p>
               <Button
+                data-testid="new-dashboard-link"
                 size="large"
                 variant="outlined"
                 onClick={() => router.push("/new")}

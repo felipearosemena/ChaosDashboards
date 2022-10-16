@@ -148,7 +148,7 @@ export default function VirtualizedAutocomplete({
       options={options}
       getOptionLabel={(option) => option.label}
       renderInput={(params) => (
-        <TextField {...params} label="Add crypto pair" />
+        <TextField {...params} data-testid={"autocomplete-input"} label="Add crypto pair" />
       )}
       renderOption={(props, option) => [props, option.label] as React.ReactNode}
       renderGroup={(params) => params as unknown as React.ReactNode}

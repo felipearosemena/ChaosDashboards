@@ -49,7 +49,7 @@ export const StatCardWidget: React.FC<StatCardWidgetProps> = ({
 }) => {
   const displayPrice = price && price > 1 ? price.toFixed(2) : price?.toFixed(5);
   return (
-    <Card>
+    <Card data-testid={`stat-card-widget-${vsCoin.symbol}-${coin.symbol}`}>
       <CardGrid>
         <CardHeader>
           <Pair>
