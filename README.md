@@ -27,6 +27,10 @@ Once the server starts, visit: `http://localhost:3000`
 ### `/api/graphql`
 All the API is driven via graphql. Visit `/api/graphql` in the browser to access the Yoga playground and browse the schema.
 
+## Running Integration tests
+
+`yarn e2e:headless` or `yarn e2e`
+
 ## Improvements
 
 - [x] Graphql + Codegen
@@ -35,6 +39,6 @@ All the API is driven via graphql. Visit `/api/graphql` in the browser to access
 - [x] Initial coin data fetching error handling
 - [x] Disable selected pairs in dashboard
 - [x] Add missing "inverse" options for unsopported currencies in api -> btc/usdt -> usdt/btc
-- [ ] Tests
+- [x] Unit tests
 - [ ] Responsive styles
 - [ ] Graceful widget + image loading
