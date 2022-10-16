@@ -14,6 +14,12 @@ export const typeDefs = gql`
     addCryptoPair(dashboardId: ID!, coinId: String!, vsCurrency: String!): Dashboard!
   }
 
+  type Dashboard @entity {
+    id: String! @id
+    title: String! @column
+    pairs: [CryptoPair!]! @column
+  }
+
   type SuccessResponse { success: Boolean }
 
   type StartCardWidget {
@@ -53,11 +59,5 @@ export const typeDefs = gql`
 
   type SupportedCurrency {
     symbol: String!
-  }
-
-  type Dashboard @entity {
-    id: String! @id
-    title: String! @column
-    pairs: [CryptoPair!]! @column
   }
 `;
