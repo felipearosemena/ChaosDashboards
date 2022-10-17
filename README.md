@@ -39,6 +39,6 @@ All the API is driven via graphql. Visit `/api/graphql` in the browser to access
 - [x] Initial coin data fetching error handling
 - [x] Disable selected pairs in dashboard
 - [x] Add missing "inverse" options for unsopported currencies in api -> btc/usdt -> usdt/btc
-- [x] Unit tests
+- [ ] Unit tests
 - [ ] Responsive styles
 - [ ] Graceful widget + image loading
