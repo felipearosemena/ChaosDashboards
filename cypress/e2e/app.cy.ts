@@ -9,11 +9,13 @@ describe("Creating dashboards", () => {
 
     cy.get('[data-testid="nav-bar-new-button"]').click();
 
+    cy.wait(3000)
     cy.url().should("include", "/new");
 
     cy.get('[data-testid="new-dashboard-title"]').type("New Dashboard");
     cy.get('[data-testid="new-dashboard-button"]').click();
 
+    cy.wait(3000)
     cy.url().should("include", "/dashboard");
 
     cy.get('[data-testid="autocomplete-input"] input')
