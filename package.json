@@ -10,8 +10,8 @@
     "generate": "graphql-codegen",
     "cypress": "cypress open",
     "cypress:headless": "cypress run",
-    "e2e": "start-server-and-test dev http://localhost:3000 cypress",
-    "e2e:headless": "start-server-and-test dev http://localhost:3000 cypress:headless"
+    "e2e": "yarn build && start-server-and-test start http://localhost:3000 cypress",
+    "e2e:headless": "yarn build && start-server-and-test start http://localhost:3000 cypress:headless"
   },
   "dependencies": {
     "@apollo/client": "^3.7.0",
