@@ -82,6 +82,7 @@ export type PricePair = {
 };
 
 export type Query = {
+  coins: Array<Coin>;
   dashboard?: Maybe<Dashboard>;
   dashboards: Array<Dashboard>;
   pairOptions: Array<CryptoPairOption>;
@@ -445,6 +446,7 @@ export type QueryResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
 > = {
+  coins?: Resolver<Array<ResolversTypes["Coin"]>, ParentType, ContextType>;
   dashboard?: Resolver<
     Maybe<ResolversTypes["Dashboard"]>,
     ParentType,

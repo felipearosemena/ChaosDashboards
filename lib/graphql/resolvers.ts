@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import { getCoinInfo, getPrices } from "lib/coingecko";
 import { getCoinMap, priceDictKey } from "lib/utils";
 import { keyBy } from "lodash";
+import { GraphQLError } from "graphql";
 
 const dbPromise = connect();
 
@@ -40,10 +41,9 @@ const resolvers: Resolvers = {
     },
     dashboard: async (_: any, { id }) => getDashboard(id),
     widgets: async (_: any, { dashboardId }) => {
-      const coinInfo = await getCoinInfo();
-      const dashboard = await getDashboard(dashboardId);
-
-      if (dashboard) {
+      try {
+        const coinInfo = await getCoinInfo();
+        const dashboard = await getDashboard(dashboardId);
         const pricePairs = await getPrices(dashboard.pairs, coinInfo);
         const { coinsById, coinsBySymbol } = getCoinMap(coinInfo.coins);
         const priceDict = keyBy(pricePairs, ({ coinId, vsCurrency }) =>
@@ -59,9 +59,10 @@ const resolvers: Resolvers = {
 
           return { coin, vsCoin, price, key };
         });
+        
+      } catch(e) {
+        throw new GraphQLError(e)
       }
-
-      return [];
     },
     pairOptions: async () => {
       const coinInfo = await getCoinInfo();
@@ -109,6 +110,10 @@ const resolvers: Resolvers = {
       } else {
         return [];
       }
+    },
+    coins: async () => {
+      const coinInfo = await getCoinInfo();
+      return coinInfo.coins
     },
   },
   Mutation: {

@@ -5,6 +5,7 @@ export const typeDefs = gql`
     dashboards: [Dashboard!]!
     dashboard(id: ID!): Dashboard
     widgets(dashboardId: ID!): [StartCardWidget!]!
+    coins: [Coin!]!
     pairOptions: [CryptoPairOption!]!
   }
 
